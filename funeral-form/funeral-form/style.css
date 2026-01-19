@@ -1,0 +1,540 @@
+/* ========================================
+   葬儀ヒアリングシート - スタイルシート
+   ======================================== */
+
+/* ----- CSS変数 ----- */
+:root {
+  /* カラー */
+  --color-bg: #FAF8F5;
+  --color-bg-section: #FFFFFF;
+  --color-border: #E5E0D8;
+  --color-border-focus: #8B7355;
+  --color-text: #3D3D3D;
+  --color-text-muted: #6B6B6B;
+  --color-accent: #6B5344;
+  --color-accent-light: #A69080;
+  
+  /* セクションヘッダーカラー */
+  --color-header-deceased: #5C4A3D;
+  --color-header-mourner: #4A5C5C;
+  --color-header-billing: #5C5C4A;
+  --color-header-religion: #4A4A5C;
+  
+  /* フォント */
+  --font-main: 'Noto Sans JP', sans-serif;
+  --font-heading: 'Zen Maru Gothic', sans-serif;
+  
+  /* その他 */
+  --radius: 12px;
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+/* ----- リセット ----- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+}
+
+body {
+  font-family: var(--font-main);
+  background: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.8;
+  padding: 24px;
+  min-height: 100vh;
+}
+
+/* ----- コンテナ ----- */
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* ========================================
+   ヘッダー
+   ======================================== */
+.page-header {
+  text-align: center;
+  padding: 32px 0 40px;
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: 32px;
+}
+
+.page-header h1 {
+  font-family: var(--font-heading);
+  font-size: 1.75rem;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  color: var(--color-accent);
+  margin-bottom: 16px;
+}
+
+.page-header .notes {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  text-align: left;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.page-header .notes p {
+  margin-bottom: 4px;
+}
+
+/* ========================================
+   セクション
+   ======================================== */
+.section {
+  background: var(--color-bg-section);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  margin-bottom: 24px;
+  overflow: hidden;
+}
+
+.section-header {
+  padding: 18px 24px;
+  color: #fff;
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.section-header::before {
+  content: '';
+  display: block;
+  width: 4px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 2px;
+}
+
+/* セクションヘッダー色分け */
+.section-header.trigger {
+  background: linear-gradient(135deg, #6B5344 0%, #8B7355 100%);
+}
+
+.section-header.deceased {
+  background: linear-gradient(135deg, var(--color-header-deceased) 0%, #7D6A5D 100%);
+}
+
+.section-header.mourner {
+  background: linear-gradient(135deg, var(--color-header-mourner) 0%, #6A7D7D 100%);
+}
+
+.section-header.billing {
+  background: linear-gradient(135deg, var(--color-header-billing) 0%, #7D7D6A 100%);
+}
+
+.section-header.religion {
+  background: linear-gradient(135deg, var(--color-header-religion) 0%, #6A6A7D 100%);
+}
+
+.section-body {
+  padding: 28px;
+}
+
+/* ========================================
+   フォーム行
+   ======================================== */
+.form-row {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 16px;
+  align-items: start;
+  padding: 16px 0;
+  border-bottom: 1px dashed var(--color-border);
+}
+
+.form-row:last-child {
+  border-bottom: none;
+}
+
+.form-row.no-label {
+  grid-template-columns: 1fr;
+}
+
+.form-label {
+  font-weight: 500;
+  font-size: 0.95rem;
+  color: var(--color-text);
+  padding-top: 12px;
+}
+
+.form-label .sub {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
+/* ========================================
+   入力フィールド
+   ======================================== */
+input[type="text"],
+input[type="tel"],
+input[type="number"],
+select,
+textarea {
+  width: 100%;
+  padding: 14px 16px;
+  font-size: 1.1rem;
+  font-family: var(--font-main);
+  border: 2px solid var(--color-border);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--color-text);
+  transition: border-color 0.2s, box-shadow 0.2s;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--color-border-focus);
+  box-shadow: 0 0 0 4px rgba(139, 115, 85, 0.1);
+}
+
+select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%236B6B6B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6,9 12,15 18,9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 20px;
+  padding-right: 44px;
+}
+
+textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+/* ----- 入力グループ（横並び） ----- */
+.input-group {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.input-group .input-with-unit {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.input-group .input-with-unit input {
+  width: 100px;
+}
+
+.input-group .unit {
+  font-size: 0.95rem;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.input-group select.era {
+  width: 100px;
+}
+
+.input-group select.small {
+  width: 80px;
+}
+
+/* ========================================
+   チェックボックス・ラジオボタン
+   ======================================== */
+.checkbox-group,
+.radio-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.checkbox-item,
+.radio-item {
+  position: relative;
+}
+
+.checkbox-item input,
+.radio-item input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.checkbox-item label,
+.radio-item label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 20px;
+  background: var(--color-bg);
+  border: 2px solid var(--color-border);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.2s;
+  min-width: 120px;
+  justify-content: center;
+}
+
+.checkbox-item input:checked + label,
+.radio-item input:checked + label {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #fff;
+}
+
+.checkbox-item label:active,
+.radio-item label:active {
+  transform: scale(0.98);
+}
+
+.checkbox-item.wide label,
+.radio-item.wide label {
+  min-width: 180px;
+}
+
+/* ========================================
+   サブセクション
+   ======================================== */
+.subsection {
+  background: var(--color-bg);
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 8px;
+}
+
+.subsection-title {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--color-accent);
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+/* ----- 注釈テキスト ----- */
+.note-text {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  margin-top: 8px;
+}
+
+/* ========================================
+   同上チェック
+   ======================================== */
+.same-as-check {
+  background: linear-gradient(135deg, #F5F3F0 0%, #EBE8E3 100%);
+  padding: 16px 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.same-as-check input[type="checkbox"] {
+  width: 24px;
+  height: 24px;
+  accent-color: var(--color-accent);
+}
+
+.same-as-check label {
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+/* ========================================
+   精算方法
+   ======================================== */
+.payment-method {
+  background: #F8F6F3;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.payment-method-title {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  margin-bottom: 12px;
+}
+
+/* ========================================
+   住所入力
+   ======================================== */
+.address-input {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.address-input .postal {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.address-input .postal input {
+  width: 160px;
+}
+
+.address-input .postal .prefix {
+  font-size: 1.1rem;
+  color: var(--color-text-muted);
+}
+
+/* ========================================
+   連絡先
+   ======================================== */
+.contact-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.contact-item label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  margin-bottom: 8px;
+}
+
+/* ========================================
+   ボタン
+   ======================================== */
+.form-actions {
+  padding: 40px 0;
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+}
+
+.btn {
+  padding: 18px 48px;
+  font-size: 1.1rem;
+  font-family: var(--font-heading);
+  font-weight: 500;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--color-accent) 0%, #8B7355 100%);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(107, 83, 68, 0.3);
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+  box-shadow: 0 2px 6px rgba(107, 83, 68, 0.3);
+}
+
+.btn-secondary {
+  background: #fff;
+  color: var(--color-accent);
+  border: 2px solid var(--color-border);
+}
+
+.btn-secondary:active {
+  background: var(--color-bg);
+}
+
+/* ========================================
+   無効化状態
+   ======================================== */
+.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* ========================================
+   レスポンシブ対応
+   ======================================== */
+@media (max-width: 768px) {
+  body {
+    padding: 16px;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .form-label {
+    padding-top: 0;
+    padding-bottom: 4px;
+  }
+
+  .contact-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .checkbox-item label,
+  .radio-item label {
+    min-width: 100px;
+    padding: 12px 16px;
+    font-size: 0.95rem;
+  }
+
+  .input-group {
+    gap: 8px;
+  }
+
+  .form-actions {
+    flex-direction: column;
+    padding: 32px 0;
+  }
+
+  .btn {
+    width: 100%;
+  }
+}
+
+/* ========================================
+   印刷用スタイル
+   ======================================== */
+@media print {
+  body {
+    background: #fff;
+    padding: 0;
+  }
+
+  .section {
+    box-shadow: none;
+    border: 1px solid #ccc;
+    break-inside: avoid;
+  }
+
+  .form-actions {
+    display: none;
+  }
+
+  .checkbox-item label,
+  .radio-item label {
+    border: 1px solid #999;
+  }
+
+  .checkbox-item input:checked + label,
+  .radio-item input:checked + label {
+    background: #333;
+  }
+}
