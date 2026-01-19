@@ -11,7 +11,7 @@ async function loadRecord() {
   const data = await res.json();
 
   // HTML に表示
-  document.querySelector("#deceased_name").textContent = data.deceased_name;
-  document.querySelector("#deceased_furigana").textContent = data.deceased_furigana;
+  document.querySelector("#deceased_name").value = data.deceased_name;
+  document.querySelector("#deceased_furigana").value = data.deceased_furigana;
 }
 loadRecord();
