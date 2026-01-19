@@ -1,4 +1,3 @@
-<script>
 async function loadRecord() {
   const params = new URLSearchParams(location.search);
   const conductId = params.get("id");
@@ -15,6 +14,4 @@ async function loadRecord() {
   document.querySelector("#deceased_name").textContent = data.deceased_name;
   document.querySelector("#deceased_furigana").textContent = data.deceased_furigana;
 }
-
 loadRecord();
-</script>
