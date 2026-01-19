@@ -181,9 +181,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // 確認ダイアログ
-    if (confirm('入力内容を確認しますか？')) {
+    if (confirm('保存しますか？')) {
       // ここで実際の送信処理やプレビュー画面への遷移を行う
-      showConfirmation(data);
+      saveRecord();
     }
   }
 
@@ -294,7 +294,6 @@ ${data.payment_method || '未選択'}
   }
 
   // イベントリスナー登録
-  btnSaveDraft.addEventListener('click', saveDraft);
   form.addEventListener('submit', handleSubmit);
 
   // 初期化実行
