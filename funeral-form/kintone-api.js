@@ -3,6 +3,12 @@ async function loadRecord() {
   const params = new URLSearchParams(location.search);
   const conductId = params.get("id");
 
+  // id が無ければ処理しない
+  if (!conductId) {
+    console.warn("conductId がありません。loadRecord を中断します。");
+    return;
+  }
+
   const res = await fetch("https://ceremonyheart.kkumagai.workers.dev/", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -17,10 +23,17 @@ async function loadRecord() {
 }
 loadRecord();
 
+
 // 保存時のレコード更新
 async function saveRecord() {
   const params = new URLSearchParams(location.search);
   const conductId = params.get("id");
+
+  // id が無ければ処理しない
+  if (!conductId) {
+    alert("ID が無いため保存できません");
+    return;
+  }
 
   const payload = {
     conductId,

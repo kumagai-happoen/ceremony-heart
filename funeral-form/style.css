@@ -180,6 +180,12 @@ body {
   margin-top: 2px;
 }
 
+.form-label .required {
+  color: #C94A4A;
+  font-weight: 600;
+  margin-left: 4px;
+}
+
 /* ========================================
    入力フィールド
    ======================================== */
@@ -240,6 +246,15 @@ textarea {
   width: 100px;
 }
 
+.input-group .input-with-unit.flex-1 {
+  flex: 1;
+}
+
+.input-group .input-with-unit input[type="text"] {
+  flex: 1;
+  min-width: 0;
+}
+
 .input-group .unit {
   font-size: 0.95rem;
   color: var(--color-text-muted);
@@ -272,9 +287,10 @@ textarea {
 .checkbox-item input,
 .radio-item input {
   position: absolute;
-  opacity: 0;
-  width: 0;
-  height: 0;
+  opacity: 0.01; /* 完全に透明にせず、わずかに可視化 */
+  width: 1px;
+  height: 1px;
+  pointer-events: none; /* クリックイベントはラベルに委譲 */
 }
 
 .checkbox-item label,
@@ -419,6 +435,31 @@ textarea {
 /* ========================================
    ボタン
    ======================================== */
+.btn-calc-age {
+  padding: 12px 20px;
+  font-size: 0.9rem;
+  font-family: var(--font-main);
+  font-weight: 500;
+  background: linear-gradient(135deg, #8B7355 0%, #A69080 100%);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(107, 83, 68, 0.2);
+}
+
+.btn-calc-age:hover {
+  background: linear-gradient(135deg, #6B5344 0%, #8B7355 100%);
+  box-shadow: 0 3px 8px rgba(107, 83, 68, 0.3);
+}
+
+.btn-calc-age:active {
+  transform: scale(0.98);
+  box-shadow: 0 1px 3px rgba(107, 83, 68, 0.2);
+}
+
 .form-actions {
   padding: 40px 0;
   display: flex;

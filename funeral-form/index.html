@@ -58,10 +58,14 @@
               <input type="checkbox" id="trigger8" name="trigger" value="利用経験">
               <label for="trigger8">利用したことがある</label>
             </div>
+            <div class="checkbox-item">
+              <input type="checkbox" id="trigger9" name="trigger" value="紹介">
+              <label for="trigger9">紹介</label>
+            </div>
           </div>
-          <div class="form-row" style="margin-top: 16px; border-bottom: none;">
+          <div class="form-row" id="referrer_row" style="margin-top: 16px; border-bottom: none; display: none;">
             <div class="form-label">紹介者</div>
-            <input type="text" name="referrer" placeholder="ご紹介者様のお名前">
+            <input type="text" id="referrer" name="referrer" placeholder="ご紹介者様のお名前">
           </div>
         </div>
       </section>
@@ -71,105 +75,93 @@
         <div class="section-header deceased">故人</div>
         <div class="section-body">
           <div class="form-row">
-            <div class="form-label">ふりがな</div>
-            <input type="text" id="deceased_furigana" name="deceased_furigana" placeholder="こじん ふりがな">
+            <div class="form-label">故人名<span class="required">*</span></div>
+            <input type="text" id="deceased_name" name="deceased_name" placeholder="故人名" required>
           </div>
 
           <div class="form-row">
-            <div class="form-label">故人名</div>
-            <div class="input-group">
-              <input type="text" id="deceased_name" name="deceased_name" placeholder="故人名" style="flex: 1;">
-              <div class="radio-group">
-                <div class="radio-item">
-                  <input type="radio" id="gender_m" name="deceased_gender" value="男性">
-                  <label for="gender_m">男性</label>
+            <div class="form-label">ふりがな<span class="required">*</span></div>
+            <input type="text" id="deceased_furigana" name="deceased_furigana" placeholder="こじん ふりがな" required>
+          </div>
+
+          <div class="form-row">
+            <div class="form-label">性別<span class="required">*</span></div>
+            <div class="radio-group">
+              <div class="radio-item">
+                <input type="radio" id="gender_m" name="deceased_gender" value="男性" required>
+                <label for="gender_m">男性</label>
+              </div>
+              <div class="radio-item">
+                <input type="radio" id="gender_f" name="deceased_gender" value="女性" required>
+                <label for="gender_f">女性</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-label">生年月日<span class="required">*</span></div>
+            <div>
+              <div class="input-group">
+                <select id="deceased_birth_era" name="deceased_birth_era" class="era" required>
+                  <option value="">元号</option>
+                  <option value="大正">大正</option>
+                  <option value="昭和">昭和</option>
+                  <option value="平成">平成</option>
+                  <option value="令和">令和</option>
+                </select>
+                <div class="input-with-unit">
+                  <input type="number" id="deceased_birth_year" name="deceased_birth_year" placeholder="00" style="width: 80px;" required>
+                  <span class="unit">年</span>
                 </div>
-                <div class="radio-item">
-                  <input type="radio" id="gender_f" name="deceased_gender" value="女性">
-                  <label for="gender_f">女性</label>
+                <div class="input-with-unit">
+                  <input type="number" id="deceased_birth_month" name="deceased_birth_month" placeholder="00" style="width: 70px;" required>
+                  <span class="unit">月</span>
+                </div>
+                <div class="input-with-unit">
+                  <input type="number" id="deceased_birth_day" name="deceased_birth_day" placeholder="00" style="width: 70px;" required>
+                  <span class="unit">日</span>
+                </div>
+                <button type="button" class="btn-calc-age" id="btn_calc_deceased_age">年齢計算</button>
+                <div class="input-with-unit">
+                  <input type="number" id="deceased_age" name="deceased_age" placeholder="00" style="width: 80px;" required>
+                  <span class="unit">歳</span>
                 </div>
               </div>
             </div>
           </div>
 
           <div class="form-row">
-            <div class="form-label">年齢</div>
-            <div class="input-group">
-              <div class="input-with-unit">
-                <input type="number" name="deceased_age" placeholder="00">
-                <span class="unit">歳</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-label">生年月日</div>
-            <div class="input-group">
-              <select name="deceased_birth_era" class="era">
-                <option value="">元号</option>
-                <option value="大正">大正</option>
-                <option value="昭和">昭和</option>
-                <option value="平成">平成</option>
-                <option value="令和">令和</option>
-              </select>
-              <div class="input-with-unit">
-                <input type="number" name="deceased_birth_year" placeholder="00" style="width: 80px;">
-                <span class="unit">年</span>
-              </div>
-              <div class="input-with-unit">
-                <input type="number" name="deceased_birth_month" placeholder="00" style="width: 70px;">
-                <span class="unit">月</span>
-              </div>
-              <div class="input-with-unit">
-                <input type="number" name="deceased_birth_day" placeholder="00" style="width: 70px;">
-                <span class="unit">日</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-label">逝去日</div>
+            <div class="form-label">逝去日<span class="required">*</span></div>
             <div class="input-group">
               <span class="unit">令和</span>
               <div class="input-with-unit">
-                <input type="number" name="deceased_death_year" placeholder="00" style="width: 80px;">
+                <input type="number" id="deceased_death_year" name="deceased_death_year" placeholder="00" style="width: 80px;" required>
                 <span class="unit">年</span>
               </div>
               <div class="input-with-unit">
-                <input type="number" name="deceased_death_month" placeholder="00" style="width: 70px;">
+                <input type="number" id="deceased_death_month" name="deceased_death_month" placeholder="00" style="width: 70px;" required>
                 <span class="unit">月</span>
               </div>
               <div class="input-with-unit">
-                <input type="number" name="deceased_death_day" placeholder="00" style="width: 70px;">
+                <input type="number" id="deceased_death_day" name="deceased_death_day" placeholder="00" style="width: 70px;" required>
                 <span class="unit">日</span>
-              </div>
-              <div class="input-with-unit">
-                <input type="number" name="deceased_death_hour" placeholder="00" style="width: 70px;">
-                <span class="unit">時</span>
-              </div>
-              <div class="input-with-unit">
-                <input type="number" name="deceased_death_min" placeholder="00" style="width: 70px;">
-                <span class="unit">分</span>
               </div>
             </div>
           </div>
 
           <div class="form-row">
-            <div class="form-label">住所</div>
+            <div class="form-label">住所<span class="required">*</span></div>
             <div class="address-input">
               <div class="postal">
                 <span class="prefix">〒</span>
-                <input type="text" name="deceased_postal" placeholder="000-0000">
+                <input type="text" id="deceased_postal" name="deceased_postal" placeholder="000-0000">
               </div>
-              <input type="text" name="deceased_address" placeholder="住所">
+              <input type="text" id="deceased_address" name="deceased_address" placeholder="住所" required>
             </div>
           </div>
 
           <div class="form-row">
-            <div class="form-label">
-              医療機器
-              <span class="sub">体内埋込</span>
-            </div>
+            <div class="form-label">医療機器</div>
             <div class="subsection">
               <div class="form-row" style="padding-top: 0;">
                 <div class="form-label">ペースメーカー</div>
@@ -191,56 +183,44 @@
                     <input type="radio" id="implant_no" name="implant" value="なし">
                     <label for="implant_no">なし</label>
                   </div>
-                  <div class="radio-item">
-                    <input type="radio" id="implant_yes" name="implant" value="あり">
-                    <label for="implant_yes">あり</label>
-                  </div>
-                </div>
-              </div>
-              <div class="form-row" style="padding-top: 12px; border-bottom: none;">
-                <div class="form-label"></div>
-                <div class="radio-group">
-                  <div class="radio-item">
-                    <input type="radio" id="implant_take" name="implant_handling" value="持ち帰り">
-                    <label for="implant_take">持ち帰り</label>
+                  <div class="radio-item wide">
+                    <input type="radio" id="implant_take" name="implant" value="あり(持ち帰り)">
+                    <label for="implant_take">あり(持ち帰り)</label>
                   </div>
                   <div class="radio-item wide">
-                    <input type="radio" id="implant_cremation" name="implant_handling" value="火葬場供養">
-                    <label for="implant_cremation">火葬場供養</label>
+                    <input type="radio" id="implant_cremation" name="implant" value="あり(火葬場供養)">
+                    <label for="implant_cremation">あり(火葬場供養)</label>
                   </div>
                 </div>
               </div>
-              <p class="note-text">
-                ※火葬場供養をご希望の場合、火葬場にて承諾書のご記入をお願いする場合があります
+              <p class="note-text" style="margin-top: 8px;">
+                ※あり（火葬場供養）をご希望の場合、火葬場にて承諾書のご記入をお願いする場合があります
               </p>
             </div>
           </div>
 
           <div class="form-row">
-            <div class="form-label">福祉</div>
-            <div class="input-group">
-              <span class="unit">生活保護受給</span>
-              <div class="radio-group">
-                <div class="radio-item">
-                  <input type="radio" id="welfare_no" name="welfare" value="なし">
-                  <label for="welfare_no">なし</label>
-                </div>
-                <div class="radio-item">
-                  <input type="radio" id="welfare_yes" name="welfare" value="あり">
-                  <label for="welfare_yes">あり</label>
-                </div>
+            <div class="form-label">生活保護受給</div>
+            <div class="radio-group">
+              <div class="radio-item">
+                <input type="radio" id="welfare_no" name="welfare" value="なし">
+                <label for="welfare_no">なし</label>
+              </div>
+              <div class="radio-item">
+                <input type="radio" id="welfare_yes" name="welfare" value="あり">
+                <label for="welfare_yes">あり</label>
               </div>
             </div>
           </div>
 
           <div class="form-row">
             <div class="form-label">趣味</div>
-            <input type="text" name="deceased_hobby" placeholder="故人様の趣味・特技など">
+            <input type="text" id="deceased_hobby" name="deceased_hobby" placeholder="故人様の趣味・特技など">
           </div>
 
           <div class="form-row">
             <div class="form-label">好きな色</div>
-            <input type="text" name="deceased_color" placeholder="好きな色">
+            <input type="text" id="deceased_color" name="deceased_color" placeholder="好きな色">
           </div>
         </div>
       </section>
@@ -250,61 +230,91 @@
         <div class="section-header mourner">喪主</div>
         <div class="section-body">
           <div class="form-row">
-            <div class="form-label">ふりがな</div>
-            <input type="text" name="mourner_furigana" placeholder="もしゅ ふりがな">
+            <div class="form-label">喪主名<span class="required">*</span></div>
+            <input type="text" id="mourner_name" name="mourner_name" placeholder="喪主名" required>
           </div>
 
           <div class="form-row">
-            <div class="form-label">喪主名</div>
-            <div class="input-group">
-              <input type="text" name="mourner_name" placeholder="喪主名" style="flex: 2;">
-              <input type="text" name="mourner_relation" placeholder="続柄" style="flex: 1;">
-            </div>
+            <div class="form-label">ふりがな<span class="required">*</span></div>
+            <input type="text" id="mourner_furigana" name="mourner_furigana" placeholder="もしゅ ふりがな" required>
           </div>
 
           <div class="form-row">
-            <div class="form-label">年齢</div>
+            <div class="form-label">続柄</div>
             <div class="input-group">
-              <div class="input-with-unit">
-                <input type="number" name="mourner_age" placeholder="00">
-                <span class="unit">歳</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-label">生年月日</div>
-            <div class="input-group">
-              <select name="mourner_birth_era" class="era">
-                <option value="">元号</option>
-                <option value="大正">大正</option>
-                <option value="昭和">昭和</option>
-                <option value="平成">平成</option>
-                <option value="令和">令和</option>
+              <select id="mourner_relation" name="mourner_relation" style="width: 200px;">
+                <option value="">続柄を選択</option>
+                <option value="夫">夫</option>
+                <option value="妻">妻</option>
+                <option value="父">父</option>
+                <option value="母">母</option>
+                <option value="夫の父">夫の父</option>
+                <option value="夫の母">夫の母</option>
+                <option value="妻の父">妻の父</option>
+                <option value="妻の母">妻の母</option>
+                <option value="長男">長男</option>
+                <option value="次男">次男</option>
+                <option value="三男">三男</option>
+                <option value="四男">四男</option>
+                <option value="長女">長女</option>
+                <option value="次女">次女</option>
+                <option value="三女">三女</option>
+                <option value="四女">四女</option>
+                <option value="兄">兄</option>
+                <option value="姉">姉</option>
+                <option value="弟">弟</option>
+                <option value="妹">妹</option>
+                <option value="孫">孫</option>
+                <option value="甥">甥</option>
+                <option value="姪">姪</option>
+                <option value="その他">その他</option>
               </select>
-              <div class="input-with-unit">
-                <input type="number" name="mourner_birth_year" placeholder="00" style="width: 80px;">
-                <span class="unit">年</span>
-              </div>
-              <div class="input-with-unit">
-                <input type="number" name="mourner_birth_month" placeholder="00" style="width: 70px;">
-                <span class="unit">月</span>
-              </div>
-              <div class="input-with-unit">
-                <input type="number" name="mourner_birth_day" placeholder="00" style="width: 70px;">
-                <span class="unit">日</span>
+              <div id="mourner_relation_other_field" style="display: none; flex: 1;">
+                <input type="text" id="mourner_relation_other" name="mourner_relation_other" placeholder="その他の続柄を入力" required>
               </div>
             </div>
           </div>
 
           <div class="form-row">
-            <div class="form-label">住所</div>
+            <div class="form-label">生年月日<span class="required">*</span></div>
+            <div>
+              <div class="input-group">
+                <select id="mourner_birth_era" name="mourner_birth_era" class="era" required>
+                  <option value="">元号</option>
+                  <option value="大正">大正</option>
+                  <option value="昭和">昭和</option>
+                  <option value="平成">平成</option>
+                  <option value="令和">令和</option>
+                </select>
+                <div class="input-with-unit">
+                  <input type="number" id="mourner_birth_year" name="mourner_birth_year" placeholder="00" style="width: 80px;" required>
+                  <span class="unit">年</span>
+                </div>
+                <div class="input-with-unit">
+                  <input type="number" id="mourner_birth_month" name="mourner_birth_month" placeholder="00" style="width: 70px;" required>
+                  <span class="unit">月</span>
+                </div>
+                <div class="input-with-unit">
+                  <input type="number" id="mourner_birth_day" name="mourner_birth_day" placeholder="00" style="width: 70px;" required>
+                  <span class="unit">日</span>
+                </div>
+                <button type="button" class="btn-calc-age" id="btn_calc_mourner_age">年齢計算</button>
+                <div class="input-with-unit">
+                  <input type="number" id="mourner_age" name="mourner_age" placeholder="00" style="width: 80px;" required>
+                  <span class="unit">歳</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-label">住所<span class="required">*</span></div>
             <div class="address-input">
               <div class="postal">
                 <span class="prefix">〒</span>
-                <input type="text" name="mourner_postal" placeholder="000-0000">
+                <input type="text" id="mourner_postal" name="mourner_postal" placeholder="000-0000">
               </div>
-              <input type="text" name="mourner_address" placeholder="住所">
+              <input type="text" id="mourner_address" name="mourner_address" placeholder="住所" required>
             </div>
           </div>
 
@@ -313,11 +323,11 @@
             <div class="contact-grid">
               <div class="contact-item">
                 <label>携帯</label>
-                <input type="tel" name="mourner_mobile" placeholder="090-0000-0000">
+                <input type="tel" id="mourner_mobile" name="mourner_mobile" placeholder="090-0000-0000">
               </div>
               <div class="contact-item">
                 <label>自宅</label>
-                <input type="tel" name="mourner_home" placeholder="03-0000-0000">
+                <input type="tel" id="mourner_home" name="mourner_home" placeholder="03-0000-0000">
               </div>
             </div>
           </div>
@@ -337,6 +347,10 @@
             <div class="payment-method-title">ご希望の精算方法</div>
             <div class="radio-group">
               <div class="radio-item wide">
+                <input type="radio" id="payment_cash" name="payment_method" value="現金精算">
+                <label for="payment_cash">現金精算</label>
+              </div>
+              <div class="radio-item wide">
                 <input type="radio" id="payment_bank" name="payment_method" value="銀行振込">
                 <label for="payment_bank">銀行振込</label>
               </div>
@@ -349,61 +363,91 @@
 
           <div id="billing_details">
             <div class="form-row">
-              <div class="form-label">ふりがな</div>
-              <input type="text" name="billing_furigana" placeholder="せしゅ ふりがな">
+              <div class="form-label">施主名<span class="required">*</span></div>
+              <input type="text" id="billing_name" name="billing_name" placeholder="施主名" required>
             </div>
 
             <div class="form-row">
-              <div class="form-label">施主名</div>
-              <div class="input-group">
-                <input type="text" name="billing_name" placeholder="施主名" style="flex: 2;">
-                <input type="text" name="billing_relation" placeholder="続柄" style="flex: 1;">
-              </div>
+              <div class="form-label">ふりがな<span class="required">*</span></div>
+              <input type="text" id="billing_furigana" name="billing_furigana" placeholder="せしゅ ふりがな" required>
             </div>
 
             <div class="form-row">
-              <div class="form-label">年齢</div>
+              <div class="form-label">続柄</div>
               <div class="input-group">
-                <div class="input-with-unit">
-                  <input type="number" name="billing_age" placeholder="00">
-                  <span class="unit">歳</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="form-row">
-              <div class="form-label">生年月日</div>
-              <div class="input-group">
-                <select name="billing_birth_era" class="era">
-                  <option value="">元号</option>
-                  <option value="大正">大正</option>
-                  <option value="昭和">昭和</option>
-                  <option value="平成">平成</option>
-                  <option value="令和">令和</option>
+                <select id="billing_relation" name="billing_relation" style="width: 200px;">
+                  <option value="">続柄を選択</option>
+                  <option value="夫">夫</option>
+                  <option value="妻">妻</option>
+                  <option value="父">父</option>
+                  <option value="母">母</option>
+                  <option value="夫の父">夫の父</option>
+                  <option value="夫の母">夫の母</option>
+                  <option value="妻の父">妻の父</option>
+                  <option value="妻の母">妻の母</option>
+                  <option value="長男">長男</option>
+                  <option value="次男">次男</option>
+                  <option value="三男">三男</option>
+                  <option value="四男">四男</option>
+                  <option value="長女">長女</option>
+                  <option value="次女">次女</option>
+                  <option value="三女">三女</option>
+                  <option value="四女">四女</option>
+                  <option value="兄">兄</option>
+                  <option value="姉">姉</option>
+                  <option value="弟">弟</option>
+                  <option value="妹">妹</option>
+                  <option value="孫">孫</option>
+                  <option value="甥">甥</option>
+                  <option value="姪">姪</option>
+                  <option value="その他">その他</option>
                 </select>
-                <div class="input-with-unit">
-                  <input type="number" name="billing_birth_year" placeholder="00" style="width: 80px;">
-                  <span class="unit">年</span>
-                </div>
-                <div class="input-with-unit">
-                  <input type="number" name="billing_birth_month" placeholder="00" style="width: 70px;">
-                  <span class="unit">月</span>
-                </div>
-                <div class="input-with-unit">
-                  <input type="number" name="billing_birth_day" placeholder="00" style="width: 70px;">
-                  <span class="unit">日</span>
+                <div id="billing_relation_other_field" style="display: none; flex: 1;">
+                  <input type="text" id="billing_relation_other" name="billing_relation_other" placeholder="その他の続柄を入力" required>
                 </div>
               </div>
             </div>
 
             <div class="form-row">
-              <div class="form-label">住所</div>
+              <div class="form-label">生年月日<span class="required">*</span></div>
+              <div>
+                <div class="input-group">
+                  <select id="billing_birth_era" name="billing_birth_era" class="era" required>
+                    <option value="">元号</option>
+                    <option value="大正">大正</option>
+                    <option value="昭和">昭和</option>
+                    <option value="平成">平成</option>
+                    <option value="令和">令和</option>
+                  </select>
+                  <div class="input-with-unit">
+                    <input type="number" id="billing_birth_year" name="billing_birth_year" placeholder="00" style="width: 80px;" required>
+                    <span class="unit">年</span>
+                  </div>
+                  <div class="input-with-unit">
+                    <input type="number" id="billing_birth_month" name="billing_birth_month" placeholder="00" style="width: 70px;" required>
+                    <span class="unit">月</span>
+                  </div>
+                  <div class="input-with-unit">
+                    <input type="number" id="billing_birth_day" name="billing_birth_day" placeholder="00" style="width: 70px;" required>
+                    <span class="unit">日</span>
+                  </div>
+                  <button type="button" class="btn-calc-age" id="btn_calc_billing_age">年齢計算</button>
+                  <div class="input-with-unit">
+                    <input type="number" id="billing_age" name="billing_age" placeholder="00" style="width: 80px;" required>
+                    <span class="unit">歳</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-label">住所<span class="required">*</span></div>
               <div class="address-input">
                 <div class="postal">
                   <span class="prefix">〒</span>
-                  <input type="text" name="billing_postal" placeholder="000-0000">
+                  <input type="text" id="billing_postal" name="billing_postal" placeholder="000-0000">
                 </div>
-                <input type="text" name="billing_address" placeholder="住所">
+                <input type="text" id="billing_address" name="billing_address" placeholder="住所" required>
               </div>
             </div>
 
@@ -412,11 +456,11 @@
               <div class="contact-grid">
                 <div class="contact-item">
                   <label>携帯</label>
-                  <input type="tel" name="billing_mobile" placeholder="090-0000-0000">
+                  <input type="tel" id="billing_mobile" name="billing_mobile" placeholder="090-0000-0000">
                 </div>
                 <div class="contact-item">
                   <label>自宅</label>
-                  <input type="tel" name="billing_home" placeholder="03-0000-0000">
+                  <input type="tel" id="billing_home" name="billing_home" placeholder="03-0000-0000">
                 </div>
               </div>
             </div>
@@ -453,8 +497,12 @@
                   <label for="religion_none">無宗教式</label>
                 </div>
               </div>
-              <div class="input-group">
-                <input type="text" name="religion_sect" placeholder="宗派名（例：浄土真宗本願寺派）">
+              <div class="input-group" id="religion_sect_fields" style="display: none;">
+                <input type="text" id="religion_sect_shu" name="religion_sect_shu" placeholder="宗名（例：浄土真宗）" style="flex: 1;">
+                <input type="text" id="religion_sect_ha" name="religion_sect_ha" placeholder="派名（例：本願寺派）" style="flex: 1;">
+              </div>
+              <div class="input-group" id="religion_other_field" style="display: none;">
+                <input type="text" id="religion_other_text" name="religion_other_text" placeholder="その他の内容を入力してください">
               </div>
             </div>
           </div>
@@ -472,7 +520,9 @@
                   <label for="temple_no">菩提寺なし</label>
                 </div>
               </div>
-              <input type="text" name="temple_name" placeholder="寺院名">
+              <div id="temple_name_field" style="display: none;">
+                <input type="text" id="temple_name" name="temple_name" placeholder="寺院名">
+              </div>
             </div>
           </div>
 
@@ -489,7 +539,9 @@
                   <label for="burial_no">なし</label>
                 </div>
               </div>
-              <input type="text" name="burial_place" placeholder="墓所等の名称">
+              <div id="burial_place_field" style="display: none;">
+                <input type="text" id="burial_place" name="burial_place" placeholder="墓所等の名称">
+              </div>
             </div>
           </div>
 
@@ -523,8 +575,14 @@
                   <input type="checkbox" id="pref_hospitality" name="preferences" value="会葬者へのもてなし">
                   <label for="pref_hospitality">会葬者へのもてなし</label>
                 </div>
+                <div class="checkbox-item">
+                  <input type="checkbox" id="pref_other" name="preferences" value="その他">
+                  <label for="pref_other">その他</label>
+                </div>
               </div>
-              <input type="text" name="preferences_other" placeholder="その他のご要望">
+              <div id="preferences_other_field" style="display: none;">
+                <input type="text" id="preferences_other" name="preferences_other" placeholder="その他のご要望">
+              </div>
             </div>
           </div>
         </div>
