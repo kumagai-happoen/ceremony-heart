@@ -19,7 +19,7 @@ async function loadRecord() {
 
   // 当社を知ったきっかけ・ご依頼理由
   setCheckboxValues("trigger", data.trigger);
-  if (data.referrer_name) document.querySelector("#referrer_name").value = data.referrer_name;
+  if (data.referrer_name) document.querySelector("#referrer").value = data.referrer_name;
   
   // 故人情報
   if (data.deceased_name) document.querySelector("#deceased_name").value = data.deceased_name;
@@ -151,7 +151,7 @@ async function saveRecord() {
     
     // 当社を知ったきっかけ・ご依頼理由
     trigger: getCheckboxValues("trigger"),
-    referrer_name: document.querySelector("#referrer_name")?.value || '',
+    referrer_name: document.querySelector("#referrer")?.value || '',
     
     // 故人情報
     deceased_name: document.querySelector("#deceased_name")?.value || '',
