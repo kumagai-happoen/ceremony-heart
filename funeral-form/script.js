@@ -82,6 +82,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const billingFields = [
       'billing_name',
       'billing_furigana',
+      'billing_relation',
       'billing_birth_era',
       'billing_birth_year',
       'billing_birth_month',
