@@ -133,6 +133,22 @@ document.addEventListener('DOMContentLoaded', function() {
     const sectFields = document.getElementById('religion_sect_fields');
     const otherField = document.getElementById('religion_other_field');
     
+    // 現在の状態を確認して表示を更新
+    const checkedRadio = document.querySelector('input[name="religion"]:checked');
+    if (checkedRadio && sectFields && otherField) {
+      if (checkedRadio.value === '仏式') {
+        sectFields.style.display = 'flex';
+        otherField.style.display = 'none';
+      } else if (checkedRadio.value === 'その他') {
+        sectFields.style.display = 'none';
+        otherField.style.display = '';
+      } else {
+        sectFields.style.display = 'none';
+        otherField.style.display = 'none';
+      }
+    }
+    
+    // イベントリスナーも登録
     religionRadios.forEach(radio => {
       radio.addEventListener('change', function() {
         if (this.value === '仏式' && this.checked) {
@@ -790,4 +806,107 @@ ${data.payment_method || '未選択'}
 
   // 初期化実行
   init();
+  
+  // ========================================
+  // 外部から呼び出せる関数をwindowオブジェクトに公開
+  // ========================================
+  window.applyConditionalDisplays = function() {
+    // 紹介者欄
+    if (trigger9 && trigger9.checked && referrerRow) {
+      referrerRow.style.display = '';
+    }
+    
+    // 宗旨・宗派
+    const checkedReligion = document.querySelector('input[name="religion"]:checked');
+    const sectFields = document.getElementById('religion_sect_fields');
+    const otherField = document.getElementById('religion_other_field');
+    if (checkedReligion && sectFields && otherField) {
+      if (checkedReligion.value === '仏式') {
+        sectFields.style.display = 'flex';
+        otherField.style.display = 'none';
+      } else if (checkedReligion.value === 'その他') {
+        sectFields.style.display = 'none';
+        otherField.style.display = '';
+      } else {
+        sectFields.style.display = 'none';
+        otherField.style.display = 'none';
+      }
+    }
+    
+    // 寺院名
+    const checkedTemple = document.querySelector('input[name="temple"]:checked');
+    const templeNameField = document.getElementById('temple_name_field');
+    if (checkedTemple && templeNameField) {
+      if (checkedTemple.value === '菩提寺あり') {
+        templeNameField.style.display = '';
+      } else {
+        templeNameField.style.display = 'none';
+      }
+    }
+    
+    // 納骨先
+    const checkedBurial = document.querySelector('input[name="burial"]:checked');
+    const burialPlaceField = document.getElementById('burial_place_field');
+    if (checkedBurial && burialPlaceField) {
+      if (checkedBurial.value === 'あり') {
+        burialPlaceField.style.display = '';
+      } else {
+        burialPlaceField.style.display = 'none';
+      }
+    }
+    
+    // こだわりの「その他」
+    const prefOther = document.getElementById('pref_other');
+    const preferencesOtherField = document.getElementById('preferences_other_field');
+    if (prefOther && preferencesOtherField) {
+      if (prefOther.checked) {
+        preferencesOtherField.style.display = '';
+      } else {
+        preferencesOtherField.style.display = 'none';
+      }
+    }
+    
+    // 喪主の続柄「その他」
+    const mournerRelation = document.getElementById('mourner_relation');
+    const mournerRelationOtherField = document.getElementById('mourner_relation_other_field');
+    const mournerRelationOtherInput = document.getElementById('mourner_relation_other');
+    if (mournerRelation && mournerRelationOtherField) {
+      if (mournerRelation.value === 'その他') {
+        mournerRelationOtherField.style.display = 'block';
+        if (mournerRelationOtherInput) mournerRelationOtherInput.required = true;
+      } else {
+        mournerRelationOtherField.style.display = 'none';
+        if (mournerRelationOtherInput) {
+          mournerRelationOtherInput.required = false;
+          mournerRelationOtherInput.value = '';
+        }
+      }
+    }
+    
+    // 施主の続柄「その他」
+    const billingRelation = document.getElementById('billing_relation');
+    const billingRelationOtherField = document.getElementById('billing_relation_other_field');
+    const billingRelationOtherInput = document.getElementById('billing_relation_other');
+    if (billingRelation && billingRelationOtherField) {
+      if (billingRelation.value === 'その他') {
+        billingRelationOtherField.style.display = 'block';
+        if (billingRelationOtherInput) billingRelationOtherInput.required = true;
+      } else {
+        billingRelationOtherField.style.display = 'none';
+        if (billingRelationOtherInput) {
+          billingRelationOtherInput.required = false;
+          billingRelationOtherInput.value = '';
+        }
+      }
+    }
+    
+    // 「喪主に同じ」のdisabled制御
+    if (sameAsMournerCheckbox && sameAsMournerCheckbox.checked && billingDetails) {
+      billingDetails.classList.add('disabled');
+      toggleBillingRequiredFields(false);
+    } else if (billingDetails) {
+      billingDetails.classList.remove('disabled');
+      toggleBillingRequiredFields(true);
+    }
+  };
 });

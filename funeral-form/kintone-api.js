@@ -93,6 +93,17 @@ async function loadRecord() {
   // こだわり
   setCheckboxValues("preferences", data.preferences);
   if (data.preferences_other) document.querySelector("#preferences_other").value = data.preferences_other;
+  
+  // ========================================
+  // データロード後の条件付き表示制御
+  // script.jsの関数を再実行して状態を反映
+  // ========================================
+  if (typeof window.applyConditionalDisplays === 'function') {
+    // script.jsが読み込まれている場合
+    setTimeout(() => {
+      window.applyConditionalDisplays();
+    }, 100);
+  }
 }
 
 // チェックボックスの値を設定するヘルパー関数
