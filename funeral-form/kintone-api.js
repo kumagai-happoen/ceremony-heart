@@ -98,7 +98,8 @@ async function loadRecord() {
 // チェックボックスの値を設定するヘルパー関数
 function setCheckboxValues(name, values) {
   if (!values) return;
-  const valuesArray = Array.isArray(values) ? values : values.split(',');
+  // 配列として受け取る（kintoneから来るデータは配列）
+  const valuesArray = Array.isArray(values) ? values : [];
   document.querySelectorAll(`input[name="${name}"]`).forEach(checkbox => {
     checkbox.checked = valuesArray.includes(checkbox.value);
   });
@@ -122,11 +123,10 @@ async function saveRecord() {
     return;
   }
 
-  // チェックボックスの値を取得するヘルパー関数
+  // チェックボックスの値を取得するヘルパー関数（配列で返す）
   function getCheckboxValues(name) {
     return Array.from(document.querySelectorAll(`input[name="${name}"]:checked`))
-      .map(cb => cb.value)
-      .join(',');
+      .map(cb => cb.value);
   }
 
   // ラジオボタンの値を取得するヘルパー関数
