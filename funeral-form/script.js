@@ -492,9 +492,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // 確認ダイアログ
     if (confirm('保存しますか？')) {
+      // kintoneに保存
+      saveRecord();
       showToast('保存しました', 'success');
-      // ここで実際の送信処理を行う
-      // saveRecord();
     }
   }
 

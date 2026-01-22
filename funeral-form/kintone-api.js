@@ -227,6 +227,9 @@ async function saveRecord() {
     preferences_other: document.querySelector("#preferences_other")?.value || ''
   };
 
+  // デバッグ: 送信するデータを確認
+  console.log('kintoneに送信するpayload:', payload);
+
   const res = await fetch("https://ceremonyheart.kkumagai.workers.dev/update", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -238,6 +241,9 @@ async function saveRecord() {
 
   alert("保存しました");
 }
+
+// グローバルに公開
+window.saveRecord = saveRecord;
 
 // ページ読み込み時に実行
 loadRecord();
