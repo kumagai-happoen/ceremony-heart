@@ -99,6 +99,33 @@
           </div>
 
           <div class="form-row">
+            <div class="form-label">逝去日<span class="required">*</span></div>
+            <div class="input-group">
+              <span class="unit">令和</span>
+              <div class="input-with-unit">
+                <input type="number" id="deceased_death_year" name="deceased_death_year" placeholder="00" style="width: 80px;" required>
+                <span class="unit">年</span>
+              </div>
+              <div class="input-with-unit">
+                <input type="number" id="deceased_death_month" name="deceased_death_month" placeholder="00" style="width: 70px;" required>
+                <span class="unit">月</span>
+              </div>
+              <div class="input-with-unit">
+                <input type="number" id="deceased_death_day" name="deceased_death_day" placeholder="00" style="width: 70px;" required>
+                <span class="unit">日</span>
+              </div>
+              <div class="input-with-unit">
+                <input type="number" id="deceased_death_hour" name="deceased_death_hour" placeholder="00" style="width: 70px;" min="0" max="23">
+                <span class="unit">時</span>
+              </div>
+              <div class="input-with-unit">
+                <input type="number" id="deceased_death_minute" name="deceased_death_minute" placeholder="00" style="width: 70px;" min="0" max="59">
+                <span class="unit">分</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row">
             <div class="form-label">生年月日<span class="required">*</span></div>
             <div>
               <div class="input-group">
@@ -126,25 +153,6 @@
                   <input type="number" id="deceased_age" name="deceased_age" placeholder="00" style="width: 80px;" required>
                   <span class="unit">歳</span>
                 </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-label">逝去日<span class="required">*</span></div>
-            <div class="input-group">
-              <span class="unit">令和</span>
-              <div class="input-with-unit">
-                <input type="number" id="deceased_death_year" name="deceased_death_year" placeholder="00" style="width: 80px;" required>
-                <span class="unit">年</span>
-              </div>
-              <div class="input-with-unit">
-                <input type="number" id="deceased_death_month" name="deceased_death_month" placeholder="00" style="width: 70px;" required>
-                <span class="unit">月</span>
-              </div>
-              <div class="input-with-unit">
-                <input type="number" id="deceased_death_day" name="deceased_death_day" placeholder="00" style="width: 70px;" required>
-                <span class="unit">日</span>
               </div>
             </div>
           </div>

@@ -33,6 +33,14 @@ async function loadRecord() {
   if (data.deceased_death_year) document.querySelector("#deceased_death_year").value = data.deceased_death_year;
   if (data.deceased_death_month) document.querySelector("#deceased_death_month").value = data.deceased_death_month;
   if (data.deceased_death_day) document.querySelector("#deceased_death_day").value = data.deceased_death_day;
+  
+  // 逝去時刻（"HH:MM"形式から時と分に分解）
+  if (data.deceased_death_time) {
+    const [hour, minute] = data.deceased_death_time.split(':');
+    if (hour) document.querySelector("#deceased_death_hour").value = hour;
+    if (minute) document.querySelector("#deceased_death_minute").value = minute;
+  }
+  
   if (data.deceased_postal) document.querySelector("#deceased_postal").value = data.deceased_postal;
   if (data.deceased_address) document.querySelector("#deceased_address").value = data.deceased_address;
   setRadioValue("pacemaker", data.pacemaker);
@@ -165,6 +173,17 @@ async function saveRecord() {
     deceased_death_year: document.querySelector("#deceased_death_year")?.value || '',
     deceased_death_month: document.querySelector("#deceased_death_month")?.value || '',
     deceased_death_day: document.querySelector("#deceased_death_day")?.value || '',
+    
+    // 逝去時刻（時と分を"HH:MM"形式に変換）
+    deceased_death_time: (() => {
+      const hour = document.querySelector("#deceased_death_hour")?.value || '';
+      const minute = document.querySelector("#deceased_death_minute")?.value || '';
+      if (hour && minute) {
+        return `${hour.padStart(2, '0')}:${minute.padStart(2, '0')}`;
+      }
+      return '';
+    })(),
+    
     deceased_postal: document.querySelector("#deceased_postal")?.value || '',
     deceased_address: document.querySelector("#deceased_address")?.value || '',
     pacemaker: getRadioValue("pacemaker"),
