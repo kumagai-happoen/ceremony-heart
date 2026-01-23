@@ -645,7 +645,7 @@ ${data.payment_method || '未選択'}
         } finally {
           // ボタンを元に戻す
           button.disabled = false;
-          button.textContent = '住所検索';
+          button.textContent = '住所を自動入力';
         }
       });
     });
