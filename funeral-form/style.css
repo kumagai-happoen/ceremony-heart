@@ -579,3 +579,25 @@ textarea {
     background: #333;
   }
 }
+
+/* 郵便番号検索ボタン */
+.btn-postal-search {
+  margin-left: 8px;
+  padding: 6px 12px;
+  background: #4a90e2;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s;
+}
+
+.btn-postal-search:hover {
+  background: #357abd;
+}
+
+.btn-postal-search:active {
+  background: #2868a8;
+}

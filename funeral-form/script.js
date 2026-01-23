@@ -596,27 +596,58 @@ ${data.payment_method || '未選択'}
   /**
    * 郵便番号から住所を自動入力（API連携用のスタブ）
    */
+  /**
+   * 郵便番号から住所を検索
+   */
   function setupPostalCodeLookup() {
-    const postalInputs = [
-      { postal: 'deceased_postal', address: 'deceased_address' },
-      { postal: 'mourner_postal', address: 'mourner_address' },
-      { postal: 'billing_postal', address: 'billing_address' }
-    ];
-
-    postalInputs.forEach(({ postal, address }) => {
-      const postalInput = form.querySelector(`[name="${postal}"]`);
-      const addressInput = form.querySelector(`[name="${address}"]`);
-      
-      if (postalInput && addressInput) {
-        postalInput.addEventListener('blur', function() {
-          const code = this.value.replace(/[^0-9]/g, '');
-          if (code.length === 7) {
-            // 本番環境ではAPIを呼び出して住所を取得
-            // fetchAddress(code).then(addr => addressInput.value = addr);
-            console.log(`郵便番号 ${code} の住所検索（未実装）`);
+    // 検索ボタンをすべて取得
+    const searchButtons = document.querySelectorAll('.btn-postal-search');
+    
+    searchButtons.forEach(button => {
+      button.addEventListener('click', async function() {
+        const postalId = this.getAttribute('data-postal');
+        const addressId = this.getAttribute('data-address');
+        
+        const postalInput = document.getElementById(postalId);
+        const addressInput = document.getElementById(addressId);
+        
+        if (!postalInput || !addressInput) return;
+        
+        // 郵便番号を取得（ハイフンを除去）
+        const code = postalInput.value.replace(/[^0-9]/g, '');
+        
+        if (code.length !== 7) {
+          alert('郵便番号は7桁で入力してください');
+          return;
+        }
+        
+        // ボタンを無効化
+        button.disabled = true;
+        button.textContent = '検索中...';
+        
+        try {
+          // zipcloud APIを使用
+          const response = await fetch(`https://zipcloud.ibsnet.co.jp/api/search?zipcode=${code}`);
+          const data = await response.json();
+          
+          if (data.status === 200 && data.results) {
+            const result = data.results[0];
+            // 都道府県 + 市区町村 + 町域
+            const address = result.address1 + result.address2 + result.address3;
+            addressInput.value = address;
+            showToast('住所を自動入力しました');
+          } else {
+            alert('該当する住所が見つかりませんでした');
           }
-        });
-      }
+        } catch (error) {
+          console.error('郵便番号検索エラー:', error);
+          alert('住所の取得に失敗しました');
+        } finally {
+          // ボタンを元に戻す
+          button.disabled = false;
+          button.textContent = '住所検索';
+        }
+      });
     });
   }
 
