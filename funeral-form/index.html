@@ -605,6 +605,43 @@
         </div>
       </section>
 
+      <!-- ご案内 -->
+      <section class="section">
+        <div class="section-header guidance">ご案内</div>
+        <div class="section-body">
+          <div class="form-row">
+            <div class="form-label">お問い合わせについて</div>
+            <div>
+              <div class="checkbox-group" style="margin-bottom: 12px;">
+                <div class="checkbox-item wide">
+                  <input type="checkbox" id="guidance_family" name="guidance" value="家族葬：ご親族以外の方はご参列をお断りと伝えます。">
+                  <label for="guidance_family">家族葬：ご親族以外の方はご参列をお断りと伝えます。</label>
+                </div>
+                <div class="checkbox-item wide">
+                  <input type="checkbox" id="guidance_general" name="guidance" value="一般葬：ご参列の案内を承ります。">
+                  <label for="guidance_general">一般葬：ご参列の案内を承ります。</label>
+                </div>
+                <div class="checkbox-item wide">
+                  <input type="checkbox" id="guidance_accept" name="guidance" value="供花、香典、弔電のご注文承ります。">
+                  <label for="guidance_accept">供花、香典、弔電のご注文承ります。</label>
+                </div>
+                <div class="checkbox-item wide">
+                  <input type="checkbox" id="guidance_decline" name="guidance" value="供花、香典、弔電をお断りと伝えます。">
+                  <label for="guidance_decline">供花、香典、弔電をお断りと伝えます。</label>
+                </div>
+                <div class="checkbox-item">
+                  <input type="checkbox" id="guidance_other" name="guidance" value="その他">
+                  <label for="guidance_other">その他</label>
+                </div>
+              </div>
+              <div id="guidance_other_field" style="display: none;">
+                <input type="text" id="guidance_other_text" name="guidance_other_text" placeholder="その他の内容を入力してください">
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <div class="form-actions">
         <button type="submit" class="btn btn-primary" id="btnSave">保存</button>
       </div>

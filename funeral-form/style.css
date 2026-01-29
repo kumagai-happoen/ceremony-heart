@@ -141,6 +141,10 @@ body {
   background: linear-gradient(135deg, var(--color-header-religion) 0%, #6A6A7D 100%);
 }
 
+.section-header.guidance {
+  background: linear-gradient(135deg, #5C6B4A 0%, #7D8B6A 100%);
+}
+
 .section-body {
   padding: 28px;
 }

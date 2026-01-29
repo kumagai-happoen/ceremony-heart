@@ -241,6 +241,26 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   /**
+   * ご案内の「その他」チェックボックスの処理
+   */
+  function handleGuidanceOtherChange() {
+    const guidanceOtherCheckbox = document.getElementById('guidance_other');
+    const guidanceOtherField = document.getElementById('guidance_other_field');
+    
+    if (guidanceOtherCheckbox && guidanceOtherField) {
+      guidanceOtherCheckbox.addEventListener('change', function() {
+        if (this.checked) {
+          guidanceOtherField.style.display = '';
+        } else {
+          guidanceOtherField.style.display = 'none';
+          // チェックを外したら入力内容もクリア
+          document.getElementById('guidance_other_text').value = '';
+        }
+      });
+    }
+  }
+
+  /**
    * 続柄の「その他」選択時の処理
    */
   function handleRelationChange() {
@@ -817,6 +837,9 @@ ${data.payment_method || '未選択'}
     // こだわりの「その他」チェックボックスの処理
     handlePreferencesOtherChange();
     
+    // ご案内の「その他」チェックボックスの処理
+    handleGuidanceOtherChange();
+    
     // 続柄の「その他」選択時の処理
     handleRelationChange();
     
@@ -939,6 +962,17 @@ ${data.payment_method || '未選択'}
     } else if (billingDetails) {
       billingDetails.classList.remove('disabled');
       toggleBillingRequiredFields(true);
+    }
+    
+    // ご案内セクションの「その他」チェックボックス
+    const guidanceOtherCheckbox = document.getElementById('guidance_other');
+    const guidanceOtherField = document.getElementById('guidance_other_field');
+    if (guidanceOtherCheckbox && guidanceOtherField) {
+      if (guidanceOtherCheckbox.checked) {
+        guidanceOtherField.style.display = 'block';
+      } else {
+        guidanceOtherField.style.display = 'none';
+      }
     }
   };
 });

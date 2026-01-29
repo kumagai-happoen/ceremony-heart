@@ -102,6 +102,10 @@ async function loadRecord() {
   setCheckboxValues("preferences", data.preferences);
   if (data.preferences_other) document.querySelector("#preferences_other").value = data.preferences_other;
   
+  // ご案内
+  setCheckboxValues("guidance", data.guidance);
+  if (data.guidance_other_text) document.querySelector("#guidance_other_text").value = data.guidance_other_text;
+  
   // ========================================
   // データロード後の条件付き表示制御
   // script.jsの関数を再実行して状態を反映
@@ -249,7 +253,11 @@ async function saveRecord() {
     
     // こだわり
     preferences: getCheckboxValues("preferences"),
-    preferences_other: document.querySelector("#preferences_other")?.value || ''
+    preferences_other: document.querySelector("#preferences_other")?.value || '',
+    
+    // ご案内
+    guidance: getCheckboxValues("guidance"),
+    guidance_other_text: document.querySelector("#guidance_other_text")?.value || ''
   };
 
   // デバッグ: 送信するデータを確認
