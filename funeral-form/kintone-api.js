@@ -142,7 +142,13 @@ async function saveRecord() {
     return;
   }
 
-  // チェックボックスの値を取得するヘルパー関数（配列で返す）
+  // 半角スペースを全角スペースに変換する関数
+  function spaceToFullWidth(str) {
+    if (!str) return str;
+    return str.replace(/ /g, '　'); // 半角スペースを全角スペースに
+  }
+
+  // チェックボックスの値を取得するヘルパー関数(配列で返す)
   function getCheckboxValues(name) {
     return Array.from(document.querySelectorAll(`input[name="${name}"]:checked`))
       .map(cb => cb.value);
@@ -162,8 +168,8 @@ async function saveRecord() {
     referrer_name: document.querySelector("#referrer")?.value || '',
     
     // 故人情報
-    deceased_name: document.querySelector("#deceased_name")?.value || '',
-    deceased_furigana: document.querySelector("#deceased_furigana")?.value || '',
+    deceased_name: spaceToFullWidth(document.querySelector("#deceased_name")?.value || ''),
+    deceased_furigana: spaceToFullWidth(document.querySelector("#deceased_furigana")?.value || ''),
     deceased_gender: getRadioValue("deceased_gender"),
     deceased_birth_era: document.querySelector("#deceased_birth_era")?.value || '',
     deceased_birth_year: document.querySelector("#deceased_birth_year")?.value || '',
@@ -193,8 +199,8 @@ async function saveRecord() {
     deceased_color: document.querySelector("#deceased_color")?.value || '',
     
     // 喪主情報
-    mourner_name: document.querySelector("#mourner_name")?.value || '',
-    mourner_furigana: document.querySelector("#mourner_furigana")?.value || '',
+    mourner_name: spaceToFullWidth(document.querySelector("#mourner_name")?.value || ''),
+    mourner_furigana: spaceToFullWidth(document.querySelector("#mourner_furigana")?.value || ''),
     mourner_relation: document.querySelector("#mourner_relation")?.value || '',
     mourner_relation_other: document.querySelector("#mourner_relation_other")?.value || '',
     mourner_birth_era: document.querySelector("#mourner_birth_era")?.value || '',
@@ -210,8 +216,8 @@ async function saveRecord() {
     // 施主・請求先情報
     same_as_mourner: document.querySelector("#same_as_mourner")?.checked || false,
     payment_method: getRadioValue("payment_method"),
-    billing_name: document.querySelector("#billing_name")?.value || '',
-    billing_furigana: document.querySelector("#billing_furigana")?.value || '',
+    billing_name: spaceToFullWidth(document.querySelector("#billing_name")?.value || ''),
+    billing_furigana: spaceToFullWidth(document.querySelector("#billing_furigana")?.value || ''),
     billing_relation: document.querySelector("#billing_relation")?.value || '',
     billing_relation_other: document.querySelector("#billing_relation_other")?.value || '',
     billing_birth_era: document.querySelector("#billing_birth_era")?.value || '',
