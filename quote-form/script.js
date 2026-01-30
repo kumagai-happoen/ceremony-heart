@@ -32,10 +32,10 @@ const btnCreateQuote = document.getElementById('btnCreateQuote');
 async function init() {
     // URLパラメータから施工IDを取得
     const urlParams = new URLSearchParams(window.location.search);
-    conductId = urlParams.get('conductId') || '';
+    conductId = urlParams.get('id') || '';
     
     if (!conductId) {
-        alert('施工IDが指定されていません。URLに?conductId=xxxを追加してください。');
+        alert('施工IDが指定されていません。URLに?id=xxxを追加してください。');
     }
     
     // ローディング表示
