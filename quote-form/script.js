@@ -478,10 +478,10 @@ function updateCart() {
     document.getElementById('headerCartTotal').textContent = total.toLocaleString();
     
     // 確定ボタンの有効化制御
-    // 全必須ステップ完了 かつ 最後のステップにいる場合のみ有効化
+    // 全必須ステップ完了 かつ 最後のステップに到達している場合のみ有効化
     const allRequiredCompleted = areAllRequiredStepsCompleted();
-    const isLastStep = currentStepIndex === steps.length - 1;
-    btnCreateQuote.disabled = !(allRequiredCompleted && isLastStep);
+    const reachedLastStep = currentStepIndex >= steps.length - 1;
+    btnCreateQuote.disabled = !(allRequiredCompleted && reachedLastStep);
 }
 
 // 見積作成
