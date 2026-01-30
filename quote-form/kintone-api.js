@@ -76,6 +76,7 @@ function convertProductsData(products) {
             const productId = product.product_id || '';
             const category = product.product_category || '';
             const name = product.product_name || '';
+            const searchWord = product.search_word || `${productId} ${name}`; // 検索ワードを取得（なければ生成）
             const price = parseInt(product.price_tax_included || '0');
             const displayOrder = parseInt(product.display_order || '999');
             
@@ -95,6 +96,7 @@ function convertProductsData(products) {
             return {
                 id: index + 1, // 連番でIDを振る
                 productId: productId, // kintoneの商品ID（hidden）
+                searchWord: searchWord, // kintoneの検索ワード（ルックアップ用）
                 name: name,
                 description: `${name}`, // 説明文（必要に応じて追加フィールドから取得）
                 price: price,
@@ -194,6 +196,7 @@ async function saveQuoteToKintone(conductId, cartItems) {
         // 見積データを作成
         const items = cartItems.map(item => ({
             productId: item.productId || '',
+            searchWord: item.searchWord || `${item.productId} ${item.name}`, // 検索ワードを使用
             category: REVERSE_CATEGORY_MAPPING[item.category] || item.category,
             name: item.name,
             price: item.price,
