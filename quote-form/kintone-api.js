@@ -7,7 +7,8 @@
 const WORKER_CONFIG = {
     productMasterUrl: 'https://get-product-master.kkumagai.workers.dev/',
     productImageUrl: 'https://get-product-image.kkumagai.workers.dev/',
-    saveQuoteUrl: 'https://save-quote.kkumagai.workers.dev/'
+    saveQuoteUrl: 'https://save-quote.kkumagai.workers.dev/',
+    getQuoteUrl: 'https://get-quote.kkumagai.workers.dev/'
 };
 
 // カテゴリーマッピング（kintoneの商品カテゴリとsteps定義のカテゴリを紐付け）
@@ -69,6 +70,11 @@ function convertProductsData(products) {
     if (!products || !Array.isArray(products)) {
         console.warn('商品データが配列ではありません:', products);
         return [];
+    }
+
+    // デバッグ: 最初の商品データを確認
+    if (products.length > 0) {
+        console.log('取得した商品データ（1件目）:', products[0]);
     }
 
     return products
@@ -176,6 +182,35 @@ function getFallbackProducts() {
 }
 
 /**
+ * 見積データをkintoneから取得（Workers経由）
+ * @param {string} conductId 施工ID
+ * @returns {Promise<Array>} 見積アイテムの配列
+ */
+async function getQuoteFromKintone(conductId) {
+    try {
+        const response = await fetch(`${WORKER_CONFIG.getQuoteUrl}?conductId=${conductId}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || `取得エラー: ${response.status}`);
+        }
+
+        const result = await response.json();
+        console.log('見積データを取得しました:', result);
+        return result.quote_items || [];
+
+    } catch (error) {
+        console.error('見積の取得に失敗しました:', error);
+        return []; // エラー時は空配列を返す
+    }
+}
+
+/**
  * 見積データをkintoneに保存（Workers経由）
  * @param {string} conductId 施工ID
  * @param {Array} cartItems カート内の商品配列
@@ -234,6 +269,7 @@ if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
         fetchProductsFromKintone,
         initializeProducts,
+        getQuoteFromKintone,
         saveQuoteToKintone
     };
 }

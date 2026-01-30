@@ -52,6 +52,17 @@ async function init() {
             products = getDefaultProducts();
         }
         
+        // 施工IDがある場合、既存の見積データを復元
+        if (conductId && typeof getQuoteFromKintone === 'function') {
+            console.log('既存の見積データを取得中...');
+            const quoteItems = await getQuoteFromKintone(conductId);
+            
+            if (quoteItems.length > 0) {
+                console.log('見積データを復元します:', quoteItems.length, '件');
+                restoreQuoteToCart(quoteItems);
+            }
+        }
+        
         // UIを初期化
         renderStepIndicator();
         renderCurrentStep();
@@ -133,6 +144,27 @@ function setupEventListeners() {
     btnPrev.addEventListener('click', goToPrevStep);
     btnNext.addEventListener('click', goToNextStep);
     btnCreateQuote.addEventListener('click', createQuote);
+}
+
+// 見積データをカートに復元
+function restoreQuoteToCart(quoteItems) {
+    cart = []; // カートをクリア
+    
+    quoteItems.forEach(item => {
+        // 商品IDで商品マスタから商品を検索
+        const product = products.find(p => p.productId === item.product_id);
+        
+        if (product) {
+            cart.push({
+                ...product,
+                quantity: parseInt(item.quantity) || 1
+            });
+        } else {
+            console.warn('商品が見つかりません:', item.product_id, item.product_name);
+        }
+    });
+    
+    console.log('カートを復元しました:', cart);
 }
 
 // 現在のステップのカテゴリに該当する商品がカートにあるかチェック
@@ -478,9 +510,9 @@ function updateCart() {
     document.getElementById('headerCartTotal').textContent = total.toLocaleString();
     
     // 確定ボタンの有効化制御
-    // 全必須ステップ完了 かつ 最後のステップに到達している場合のみ有効化
+    // 全必須ステップ完了 かつ その他のステップ（インデックス5）に到達している場合のみ有効化
     const allRequiredCompleted = areAllRequiredStepsCompleted();
-    const reachedLastStep = currentStepIndex >= steps.length - 1;
+    const reachedLastStep = currentStepIndex >= 5; // その他のステップ
     console.log('確定ボタン制御:', {
         currentStepIndex,
         totalSteps: steps.length,
