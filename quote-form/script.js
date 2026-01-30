@@ -162,8 +162,8 @@ function renderStepIndicator() {
 // 現在のステップを表示
 function renderCurrentStep() {
     const currentStep = steps[currentStepIndex];
-    const requiredText = currentStep.required ? '（必須・1つ選択）' : '（任意・複数選択可）';
-    stepTitle.textContent = `ステップ${currentStep.id}: ${currentStep.name}を選択 ${requiredText}`;
+    const selectionText = currentStep.required ? 'を1つ選択してください' : 'を選択してください（任意・複数選択可）';
+    stepTitle.textContent = `${currentStep.name}${selectionText}`;
     
     // ナビゲーションボタンの表示制御
     btnPrev.style.display = currentStepIndex > 0 ? 'block' : 'none';
