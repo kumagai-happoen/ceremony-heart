@@ -162,8 +162,7 @@ function renderStepIndicator() {
 // 現在のステップを表示
 function renderCurrentStep() {
     const currentStep = steps[currentStepIndex];
-    const selectionText = currentStep.required ? 'を1つ選択してください' : 'を選択してください（任意・複数選択可）';
-    stepTitle.textContent = `${currentStep.name}${selectionText}`;
+    stepTitle.textContent = currentStep.name;
     
     // ナビゲーションボタンの表示制御
     btnPrev.style.display = currentStepIndex > 0 ? 'block' : 'none';
@@ -302,7 +301,7 @@ function goToNextStep() {
     }
 }
 
-// 数量変更（任意ステップのみ）
+// 数量変更
 function updateQuantity(productId, delta) {
     const item = cart.find(item => item.id === productId);
     const product = products.find(p => p.id === productId);
@@ -320,6 +319,7 @@ function updateQuantity(productId, delta) {
         }
         updateCart();
         renderStepIndicator();
+        renderCurrentStep();
     }
 }
 
@@ -351,13 +351,13 @@ function updateCart() {
                         <div class="cart-item-name">${item.name}</div>
                         <div class="cart-item-price">¥${item.price.toLocaleString()}</div>
                     </div>
-                    ${!isRequired ? `
                     <div class="cart-item-controls">
+                        ${!isRequired ? `
                         <button class="quantity-btn" data-product-id="${item.id}" data-action="decrease">−</button>
                         <div class="quantity-display">${item.quantity}</div>
                         <button class="quantity-btn" data-product-id="${item.id}" data-action="increase">+</button>
+                        ` : `<div class="quantity-fixed">×1</div>`}
                     </div>
-                    ` : ''}
                 </div>
             `;
         }).join('');
