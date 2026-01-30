@@ -481,6 +481,13 @@ function updateCart() {
     // 全必須ステップ完了 かつ 最後のステップに到達している場合のみ有効化
     const allRequiredCompleted = areAllRequiredStepsCompleted();
     const reachedLastStep = currentStepIndex >= steps.length - 1;
+    console.log('確定ボタン制御:', {
+        currentStepIndex,
+        totalSteps: steps.length,
+        allRequiredCompleted,
+        reachedLastStep,
+        willEnable: allRequiredCompleted && reachedLastStep
+    });
     btnCreateQuote.disabled = !(allRequiredCompleted && reachedLastStep);
 }
 
