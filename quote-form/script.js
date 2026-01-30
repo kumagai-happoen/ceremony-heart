@@ -339,9 +339,14 @@ function updateCart() {
             const step = steps.find(s => s.category === product.category);
             const isRequired = step && step.required;
             
+            // 画像またはNO IMAGE表示
+            const imageContent = item.imageUrl 
+                ? `<img src="${item.imageUrl}" alt="${item.name}" class="cart-item-image">`
+                : `<div class="cart-item-no-image">NO IMAGE</div>`;
+            
             return `
                 <div class="cart-item">
-                    <div style="font-size: 1.8rem;">${item.emoji}</div>
+                    ${imageContent}
                     <div class="cart-item-info">
                         <div class="cart-item-name">${item.name}</div>
                         <div class="cart-item-price">¥${item.price.toLocaleString()}</div>
