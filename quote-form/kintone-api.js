@@ -5,7 +5,8 @@
 
 // Cloudflare Workers設定
 const WORKER_CONFIG = {
-    productMasterUrl: 'https://get-product-master.kkumagai.workers.dev/'
+    productMasterUrl: 'https://get-product-master.kkumagai.workers.dev/',
+    productImageUrl: 'https://get-product-image.kkumagai.workers.dev/'
 };
 
 // カテゴリーマッピング（kintoneの商品カテゴリとsteps定義のカテゴリを紐付け）
@@ -78,8 +79,9 @@ function convertProductsData(products) {
             
             // 画像ファイル情報を取得
             const imageFiles = product.image_files || [];
+            // WorkersのプロキシURL経由で画像を取得
             const imageUrl = imageFiles.length > 0 
-                ? `https://ceremony-heart.cybozu.com/k/v1/file.json?fileKey=${imageFiles[0].fileKey}` 
+                ? `${WORKER_CONFIG.productImageUrl}?fileKey=${imageFiles[0].fileKey}` 
                 : null;
 
             // カテゴリをマッピング

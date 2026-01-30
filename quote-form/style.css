@@ -312,6 +312,8 @@ body {
     font-size: 3.5rem;
     background: linear-gradient(135deg, #F7FAFC, #EDF2F7);
     border-bottom: 1px solid var(--border);
+    overflow: hidden;
+    position: relative;
 }
 
 .product-info {
