@@ -233,6 +233,8 @@ function renderCurrentStep() {
                 <div>このカテゴリには商品がありません</div>
             </div>
         `;
+        // 商品がない場合でも確定ボタンの制御を更新
+        updateConfirmButtonState();
         return;
     }
     
@@ -279,6 +281,9 @@ function renderCurrentStep() {
             toggleProduct(productId);
         });
     });
+    
+    // ステップ表示時に確定ボタンの状態を更新
+    updateConfirmButtonState();
 }
 
 // 商品の選択/解除を切り替え
@@ -510,6 +515,11 @@ function updateCart() {
     document.getElementById('headerCartTotal').textContent = total.toLocaleString();
     
     // 確定ボタンの有効化制御
+    updateConfirmButtonState();
+}
+
+// 確定ボタンの有効化状態を更新
+function updateConfirmButtonState() {
     // 全必須ステップ完了 かつ 最後のステップ（その他）に到達している場合のみ有効化
     const allRequiredCompleted = areAllRequiredStepsCompleted();
     const lastStepIndex = steps.length - 1; // 5（その他）
