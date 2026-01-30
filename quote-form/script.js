@@ -510,11 +510,13 @@ function updateCart() {
     document.getElementById('headerCartTotal').textContent = total.toLocaleString();
     
     // 確定ボタンの有効化制御
-    // 全必須ステップ完了 かつ その他のステップ（インデックス5）に到達している場合のみ有効化
+    // 全必須ステップ完了 かつ 最後のステップ（その他）に到達している場合のみ有効化
     const allRequiredCompleted = areAllRequiredStepsCompleted();
-    const reachedLastStep = currentStepIndex >= 5; // その他のステップ
+    const lastStepIndex = steps.length - 1; // 5（その他）
+    const reachedLastStep = currentStepIndex >= lastStepIndex;
     console.log('確定ボタン制御:', {
         currentStepIndex,
+        lastStepIndex,
         totalSteps: steps.length,
         allRequiredCompleted,
         reachedLastStep,
