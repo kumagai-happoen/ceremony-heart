@@ -199,9 +199,9 @@ function renderCurrentStep() {
         
         // 画像表示の決定: imageUrlがあれば画像、なければ絵文字
         const imageContent = product.imageUrl 
-            ? `<img src="${product.imageUrl}" alt="${product.name}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-               <span style="font-size: 4rem; display: none;">${product.emoji}</span>`
-            : `<span style="font-size: 4rem;">${product.emoji}</span>`;
+            ? `<img src="${product.imageUrl}" alt="${product.name}" class="product-image-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+               <span class="product-image-emoji" style="display: none;">${product.emoji}</span>`
+            : `<span class="product-image-emoji">${product.emoji}</span>`;
         
         return `
             <div class="product-card ${isSelected ? 'selected' : ''}" data-product-id="${product.id}">
