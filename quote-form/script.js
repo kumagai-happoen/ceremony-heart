@@ -3,7 +3,7 @@ const steps = [
     { id: 1, name: 'プラン', category: 'plan', required: true },
     { id: 2, name: '棺', category: 'casket_only', required: true },
     { id: 3, name: '祭壇', category: 'altar', required: true },
-    { id: 4, name: '供花・供物', category: 'flower', required: true },
+    { id: 4, name: '供花・供物', category: 'flower', required: false },
     { id: 5, name: 'お食事', category: 'service', required: false },
     { id: 6, name: 'その他', category: 'other', required: false }
 ];
@@ -253,17 +253,25 @@ function toggleProduct(productId) {
     if (existingItem) {
         // すでに選択されている場合は削除
         cart = cart.filter(item => item.id !== productId);
+        updateCart();
+        renderStepIndicator();
+        renderCurrentStep();
     } else {
         // 新規選択
-        cart.push({
-            ...product,
-            quantity: 1
-        });
+        // 任意ステップの場合は数量入力モーダルを表示
+        if (!currentStep.required) {
+            showQuantityModal(product);
+        } else {
+            // 必須ステップは数量1で追加
+            cart.push({
+                ...product,
+                quantity: 1
+            });
+            updateCart();
+            renderStepIndicator();
+            renderCurrentStep();
+        }
     }
-
-    updateCart();
-    renderStepIndicator();
-    renderCurrentStep();
     
     // フィードバックアニメーション
     const cartIcon = document.querySelector('.cart-icon');
@@ -271,6 +279,76 @@ function toggleProduct(productId) {
         cartIcon.classList.add('pulse');
         setTimeout(() => cartIcon.classList.remove('pulse'), 400);
     }
+}
+
+// 数量入力モーダルを表示
+function showQuantityModal(product) {
+    const modal = document.createElement('div');
+    modal.id = 'quantityModal';
+    modal.className = 'quantity-modal-overlay';
+    modal.innerHTML = `
+        <div class="quantity-modal">
+            <div class="quantity-modal-header">
+                <h3>${product.name}</h3>
+                <button class="quantity-modal-close" onclick="closeQuantityModal()">×</button>
+            </div>
+            <div class="quantity-modal-body">
+                <label for="quantityInput">数量を入力してください</label>
+                <input type="number" id="quantityInput" min="1" value="1" class="quantity-input" autofocus>
+            </div>
+            <div class="quantity-modal-footer">
+                <button class="btn-modal-cancel" onclick="closeQuantityModal()">キャンセル</button>
+                <button class="btn-modal-confirm" onclick="confirmQuantity(${product.id})">追加</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    
+    // 入力フィールドにフォーカス
+    setTimeout(() => {
+        const input = document.getElementById('quantityInput');
+        input.focus();
+        input.select();
+        
+        // Enterキーで確定
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                confirmQuantity(product.id);
+            }
+        });
+    }, 100);
+}
+
+// 数量入力モーダルを閉じる
+function closeQuantityModal() {
+    const modal = document.getElementById('quantityModal');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+// 数量を確定してカートに追加
+function confirmQuantity(productId) {
+    const input = document.getElementById('quantityInput');
+    const quantity = parseInt(input.value);
+    
+    if (!quantity || quantity < 1) {
+        alert('1以上の数量を入力してください');
+        return;
+    }
+    
+    const product = products.find(p => p.id === productId);
+    
+    // カートに追加
+    cart.push({
+        ...product,
+        quantity: quantity
+    });
+    
+    closeQuantityModal();
+    updateCart();
+    renderStepIndicator();
+    renderCurrentStep();
 }
 
 // 前のステップへ
