@@ -115,7 +115,7 @@ body {
     justify-content: space-between;
     align-items: center;
     gap: 0.75rem;
-    overflow-x: auto; /* 横スクロールを許可 */
+    overflow-x: auto;
     overflow-y: hidden;
 }
 
@@ -142,7 +142,7 @@ body {
     border-radius: 6px;
     border: 1px solid var(--border);
     transition: all 0.3s ease;
-    min-width: 0; /* 縮小を許可 */
+    min-width: 0;
 }
 
 .step-item.completed {
@@ -184,9 +184,9 @@ body {
 .step-label {
     font-size: 0.9rem;
     font-weight: 500;
-    white-space: nowrap; /* 改行しない */
-    overflow: hidden; /* はみ出しを隠す */
-    text-overflow: ellipsis; /* ...で省略 */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .step-item.active .step-label {
@@ -380,7 +380,7 @@ body {
     box-shadow: var(--shadow-sm);
     border: 1px solid var(--border);
     position: sticky;
-    top: 180px; /* ヘッダー全体の高さ + 余白 */
+    top: 180px;
     height: fit-content;
     max-height: calc(100vh - 200px);
     overflow-y: auto;
@@ -593,7 +593,7 @@ body {
     }
 
     .step-item {
-        flex-shrink: 0; /* 縮小しない */
+        flex-shrink: 0;
         min-width: auto;
         padding: 0.5rem 0.75rem;
         gap: 0.5rem;

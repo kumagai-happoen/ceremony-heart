@@ -4,240 +4,12 @@ const steps = [
     { id: 2, name: '棺', category: 'casket_only', required: true },
     { id: 3, name: '祭壇', category: 'altar', required: true },
     { id: 4, name: '供花・供物', category: 'flower', required: true },
-    { id: 5, name: '式場サービス', category: 'service', required: false },
+    { id: 5, name: 'お食事', category: 'service', required: false },
     { id: 6, name: 'その他', category: 'other', required: false }
 ];
 
-// 葬儀関連の商品データ
-const products = [
-    // プラン
-    {
-        id: 1,
-        name: '一般葬プラン',
-        description: '通夜・告別式を含む伝統的な葬儀',
-        price: 580000,
-        category: 'plan',
-        emoji: '🏛️'
-    },
-    {
-        id: 2,
-        name: '家族葬プラン',
-        description: 'ご家族・親族中心の小規模葬儀',
-        price: 420000,
-        category: 'plan',
-        emoji: '🏠'
-    },
-    {
-        id: 3,
-        name: '一日葬プラン',
-        description: '通夜を行わず告別式のみ',
-        price: 350000,
-        category: 'plan',
-        emoji: '⛪'
-    },
-    {
-        id: 4,
-        name: '直葬プラン',
-        description: '火葬のみのシンプルなお別れ',
-        price: 180000,
-        category: 'plan',
-        emoji: '🕯️'
-    },
-    
-    // 棺
-    {
-        id: 5,
-        name: '桐製棺（上級）',
-        description: '高級桐材を使用した格調高い棺',
-        price: 280000,
-        category: 'casket_only',
-        emoji: '⚰️'
-    },
-    {
-        id: 6,
-        name: '檜製棺（特級）',
-        description: '最高級檜材の棺',
-        price: 450000,
-        category: 'casket_only',
-        emoji: '⚰️'
-    },
-    {
-        id: 7,
-        name: '布張棺（標準）',
-        description: '布張り仕上げの棺',
-        price: 120000,
-        category: 'casket_only',
-        emoji: '⚰️'
-    },
-    
-    // 祭壇
-    {
-        id: 8,
-        name: '白木祭壇（中型）',
-        description: '伝統的な白木祭壇',
-        price: 350000,
-        category: 'altar',
-        emoji: '🎋'
-    },
-    {
-        id: 9,
-        name: '白木祭壇（大型）',
-        description: '荘厳な大型白木祭壇',
-        price: 580000,
-        category: 'altar',
-        emoji: '🎋'
-    },
-    {
-        id: 10,
-        name: '生花祭壇（標準）',
-        description: '季節の花を使用した生花祭壇',
-        price: 280000,
-        category: 'altar',
-        emoji: '💐'
-    },
-    
-    // 供花・供物
-    {
-        id: 11,
-        name: '供花一対（菊・洋花）',
-        description: '菊または洋花のスタンド花',
-        price: 35000,
-        category: 'flower',
-        emoji: '🌸'
-    },
-    {
-        id: 12,
-        name: '供花一基（菊・洋花）',
-        description: '菊または洋花のスタンド花（片側）',
-        price: 18000,
-        category: 'flower',
-        emoji: '🌸'
-    },
-    {
-        id: 13,
-        name: '枕花',
-        description: 'ご安置用のアレンジメント',
-        price: 15000,
-        category: 'flower',
-        emoji: '🌺'
-    },
-    {
-        id: 14,
-        name: '献花セット',
-        description: 'お別れの献花用（50名分）',
-        price: 25000,
-        category: 'flower',
-        emoji: '🌹'
-    },
-    {
-        id: 15,
-        name: '盛籠一対',
-        description: '果物等の供物籠',
-        price: 28000,
-        category: 'flower',
-        emoji: '🧺'
-    },
-    
-    // 式場サービス
-    {
-        id: 16,
-        name: '式場使用料（1日）',
-        description: '式場・控室の使用料',
-        price: 120000,
-        category: 'service',
-        emoji: '🏢'
-    },
-    {
-        id: 17,
-        name: '霊柩車（宮型）',
-        description: '伝統的な宮型霊柩車',
-        price: 85000,
-        category: 'service',
-        emoji: '🚗'
-    },
-    {
-        id: 18,
-        name: '霊柩車（洋型）',
-        description: 'リムジン型霊柩車',
-        price: 65000,
-        category: 'service',
-        emoji: '🚙'
-    },
-    {
-        id: 19,
-        name: 'マイクロバス',
-        description: '会葬者送迎用（29名乗り）',
-        price: 45000,
-        category: 'service',
-        emoji: '🚌'
-    },
-    {
-        id: 20,
-        name: '通夜振る舞い',
-        description: 'お料理とお飲物（30名分）',
-        price: 120000,
-        category: 'service',
-        emoji: '🍱'
-    },
-    {
-        id: 21,
-        name: '精進落とし',
-        description: 'お料理とお飲物（30名分）',
-        price: 150000,
-        category: 'service',
-        emoji: '🍱'
-    },
-    
-    // その他
-    {
-        id: 22,
-        name: '寝台車',
-        description: 'ご遺体搬送（50kmまで）',
-        price: 35000,
-        category: 'other',
-        emoji: '🚑'
-    },
-    {
-        id: 23,
-        name: 'ドライアイス（1日分）',
-        description: 'ご遺体保全用',
-        price: 12000,
-        category: 'other',
-        emoji: '❄️'
-    },
-    {
-        id: 24,
-        name: '遺影写真',
-        description: '四つ切サイズ額入り',
-        price: 25000,
-        category: 'other',
-        emoji: '🖼️'
-    },
-    {
-        id: 25,
-        name: '会葬礼状・返礼品',
-        description: '100名分',
-        price: 55000,
-        category: 'other',
-        emoji: '📜'
-    },
-    {
-        id: 26,
-        name: '骨壺（白磁7寸）',
-        description: '標準サイズ骨壺',
-        price: 18000,
-        category: 'other',
-        emoji: '🏺'
-    },
-    {
-        id: 27,
-        name: '位牌（塗位牌）',
-        description: '本漆塗り位牌',
-        price: 35000,
-        category: 'other',
-        emoji: '🪦'
-    }
-];
+// 商品データ（kintoneから取得後に上書きされる）
+let products = [];
 
 // カート状態管理
 let cart = [];
@@ -254,11 +26,95 @@ const btnNext = document.getElementById('btnNext');
 const btnCreateQuote = document.getElementById('btnCreateQuote');
 
 // 初期化
-function init() {
-    renderStepIndicator();
-    renderCurrentStep();
-    updateCart();
-    setupEventListeners();
+async function init() {
+    // ローディング表示
+    showLoading();
+    
+    try {
+        // kintoneから商品データを取得
+        // initializeProducts関数はkintone-api.jsで定義されている
+        if (typeof initializeProducts === 'function') {
+            products = await initializeProducts(true);
+            console.log('商品データを読み込みました:', products.length, '件');
+        } else {
+            console.warn('kintone-api.jsが読み込まれていません。固定データを使用します。');
+            products = getDefaultProducts();
+        }
+        
+        // UIを初期化
+        renderStepIndicator();
+        renderCurrentStep();
+        updateCart();
+        setupEventListeners();
+        
+    } catch (error) {
+        console.error('初期化エラー:', error);
+        alert('商品データの読み込みに失敗しました。ページを再読み込みしてください。');
+    } finally {
+        hideLoading();
+    }
+}
+
+// ローディング表示
+function showLoading() {
+    const loadingHtml = `
+        <div id="loadingOverlay" style="
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        ">
+            <div style="text-align: center;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">⏳</div>
+                <div style="font-size: 1.2rem; color: #4A5568;">商品データを読み込んでいます...</div>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', loadingHtml);
+}
+
+// ローディング非表示
+function hideLoading() {
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) {
+        overlay.remove();
+    }
+}
+
+// デフォルト商品データ（フォールバック用）
+function getDefaultProducts() {
+    return [
+        {
+            id: 1,
+            name: '一般葬プラン',
+            description: '通夜・告別式を含む伝統的な葬儀',
+            price: 580000,
+            category: 'plan',
+            emoji: '🏛️'
+        },
+        {
+            id: 2,
+            name: '家族葬プラン',
+            description: 'ご家族・親族中心の小規模葬儀',
+            price: 420000,
+            category: 'plan',
+            emoji: '🏠'
+        },
+        {
+            id: 3,
+            name: '一日葬プラン',
+            description: '通夜を行わず告別式のみ',
+            price: 350000,
+            category: 'plan',
+            emoji: '⛪'
+        }
+    ];
 }
 
 // イベントリスナー設定
@@ -328,6 +184,16 @@ function renderCurrentStep() {
     // 商品を表示
     const filteredProducts = products.filter(p => p.category === currentStep.category);
     
+    if (filteredProducts.length === 0) {
+        productsGrid.innerHTML = `
+            <div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: #718096;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">📦</div>
+                <div>このカテゴリには商品がありません</div>
+            </div>
+        `;
+        return;
+    }
+    
     productsGrid.innerHTML = filteredProducts.map(product => {
         const isSelected = cart.some(item => item.id === product.id);
         return `
@@ -396,8 +262,10 @@ function toggleProduct(productId) {
     
     // フィードバックアニメーション
     const cartIcon = document.querySelector('.cart-icon');
-    cartIcon.classList.add('pulse');
-    setTimeout(() => cartIcon.classList.remove('pulse'), 400);
+    if (cartIcon) {
+        cartIcon.classList.add('pulse');
+        setTimeout(() => cartIcon.classList.remove('pulse'), 400);
+    }
 }
 
 // 前のステップへ
@@ -514,30 +382,47 @@ function updateCart() {
 }
 
 // 見積作成
-function createQuote() {
+async function createQuote() {
     if (!areAllRequiredStepsCompleted()) {
         alert('すべての必須項目を選択してください');
         return;
     }
 
-    // カートデータをローカルストレージに保存
-    localStorage.setItem('quoteCart', JSON.stringify(cart));
-    
     const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
     const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     const tax = Math.floor(subtotal * 0.1);
     const total = subtotal + tax;
     
-    alert(`お見積内容を保存しました。\n\n選択項目: ${itemCount}件\n合計金額: ¥${total.toLocaleString()}\n\n次のステップでお見積書を作成します。`);
-    console.log('お見積データ:', {
-        items: cart,
-        summary: {
-            itemCount,
-            subtotal,
-            tax,
-            total
+    const summary = {
+        itemCount,
+        subtotal,
+        tax,
+        total
+    };
+
+    try {
+        // カートデータをローカルストレージに保存
+        localStorage.setItem('quoteCart', JSON.stringify(cart));
+        localStorage.setItem('quoteSummary', JSON.stringify(summary));
+        
+        // kintoneに見積データを保存（オプション）
+        if (typeof saveQuoteToKintone === 'function') {
+            console.log('kintoneに見積データを保存中...');
+            await saveQuoteToKintone(cart, summary);
+            alert(`お見積内容をkintoneに保存しました。\n\n選択項目: ${itemCount}件\n合計金額: ¥${total.toLocaleString()}`);
+        } else {
+            alert(`お見積内容を保存しました。\n\n選択項目: ${itemCount}件\n合計金額: ¥${total.toLocaleString()}\n\n次のステップでお見積書を作成します。`);
         }
-    });
+        
+        console.log('お見積データ:', {
+            items: cart,
+            summary: summary
+        });
+        
+    } catch (error) {
+        console.error('見積保存エラー:', error);
+        alert('見積の保存中にエラーが発生しました。ローカルには保存されています。');
+    }
 }
 
 // 初期化実行
