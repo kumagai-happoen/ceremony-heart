@@ -6,7 +6,8 @@
 // Cloudflare Workers設定
 const WORKER_CONFIG = {
     productMasterUrl: 'https://get-product-master.kkumagai.workers.dev/',
-    productImageUrl: 'https://get-product-image.kkumagai.workers.dev/'
+    productImageUrl: 'https://get-product-image.kkumagai.workers.dev/',
+    saveQuoteUrl: 'https://save-quote.kkumagai.workers.dev/'
 };
 
 // カテゴリーマッピング（kintoneの商品カテゴリとsteps定義のカテゴリを紐付け）
@@ -174,40 +175,45 @@ function getFallbackProducts() {
 
 /**
  * 見積データをkintoneに保存（Workers経由）
+ * @param {string} conductId 施工ID
  * @param {Array} cartItems カート内の商品配列
- * @param {Object} summary 合計情報
  * @returns {Promise<Object>} 保存結果
  */
-async function saveQuoteToKintone(cartItems, summary) {
+async function saveQuoteToKintone(conductId, cartItems) {
     try {
-        // 見積保存用のWorkers エンドポイント（別途作成が必要）
-        const saveQuoteUrl = 'https://save-quote.kkumagai.workers.dev/';
-
-        // 見積データを作成
-        const quoteData = {
-            items: cartItems.map(item => ({
-                product_name: item.name,
-                unit_price: item.price,
-                quantity: item.quantity,
-                amount: item.price * item.quantity
-            })),
-            item_count: summary.itemCount,
-            subtotal: summary.subtotal,
-            tax: summary.tax,
-            total: summary.total,
-            quote_date: new Date().toISOString().split('T')[0]
+        // カテゴリ名をkintoneの形式に変換（逆マッピング）
+        const REVERSE_CATEGORY_MAPPING = {
+            'plan': 'プラン',
+            'casket_only': '棺',
+            'altar': '祭壇',
+            'flower': '供花・供物',
+            'service': 'お食事',
+            'other': 'その他'
         };
 
-        const response = await fetch(saveQuoteUrl, {
+        // 見積データを作成
+        const items = cartItems.map(item => ({
+            productId: item.productId || '',
+            category: REVERSE_CATEGORY_MAPPING[item.category] || item.category,
+            name: item.name,
+            price: item.price,
+            quantity: item.quantity
+        }));
+
+        const response = await fetch(WORKER_CONFIG.saveQuoteUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(quoteData)
+            body: JSON.stringify({
+                conductId: conductId,
+                items: items
+            })
         });
 
         if (!response.ok) {
-            throw new Error(`見積保存エラー: ${response.status}`);
+            const errorData = await response.json();
+            throw new Error(errorData.message || `保存エラー: ${response.status}`);
         }
 
         const result = await response.json();

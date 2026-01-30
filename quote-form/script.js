@@ -15,6 +15,9 @@ let products = [];
 let cart = [];
 let currentStepIndex = 0;
 
+// 施工ID（URLパラメータから取得）
+let conductId = '';
+
 // DOM要素
 const stepIndicator = document.getElementById('stepIndicator');
 const stepTitle = document.getElementById('stepTitle');
@@ -27,6 +30,14 @@ const btnCreateQuote = document.getElementById('btnCreateQuote');
 
 // 初期化
 async function init() {
+    // URLパラメータから施工IDを取得
+    const urlParams = new URLSearchParams(window.location.search);
+    conductId = urlParams.get('conductId') || '';
+    
+    if (!conductId) {
+        alert('施工IDが指定されていません。URLに?conductId=xxxを追加してください。');
+    }
+    
     // ローディング表示
     showLoading();
     
@@ -467,7 +478,10 @@ function updateCart() {
     document.getElementById('headerCartTotal').textContent = total.toLocaleString();
     
     // 確定ボタンの有効化制御
-    btnCreateQuote.disabled = !areAllRequiredStepsCompleted();
+    // 全必須ステップ完了 かつ 最後のステップにいる場合のみ有効化
+    const allRequiredCompleted = areAllRequiredStepsCompleted();
+    const isLastStep = currentStepIndex === steps.length - 1;
+    btnCreateQuote.disabled = !(allRequiredCompleted && isLastStep);
 }
 
 // 見積作成
@@ -476,41 +490,41 @@ async function createQuote() {
         alert('すべての必須項目を選択してください');
         return;
     }
+    
+    if (!conductId) {
+        alert('施工IDが設定されていません');
+        return;
+    }
 
     const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
     const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     const tax = Math.floor(subtotal * 0.1);
     const total = subtotal + tax;
-    
-    const summary = {
-        itemCount,
-        subtotal,
-        tax,
-        total
-    };
 
     try {
-        // カートデータをローカルストレージに保存
-        localStorage.setItem('quoteCart', JSON.stringify(cart));
-        localStorage.setItem('quoteSummary', JSON.stringify(summary));
+        // ローディング表示
+        showLoading();
         
-        // kintoneに見積データを保存（オプション）
+        // kintoneに見積データを保存
         if (typeof saveQuoteToKintone === 'function') {
             console.log('kintoneに見積データを保存中...');
-            await saveQuoteToKintone(cart, summary);
-            alert(`お見積内容をkintoneに保存しました。\n\n選択項目: ${itemCount}件\n合計金額: ¥${total.toLocaleString()}`);
+            await saveQuoteToKintone(conductId, cart);
+            alert(`お見積内容を保存しました。\n\n選択項目: ${itemCount}件\n合計金額: ¥${total.toLocaleString()}`);
         } else {
-            alert(`お見積内容を保存しました。\n\n選択項目: ${itemCount}件\n合計金額: ¥${total.toLocaleString()}\n\n次のステップでお見積書を作成します。`);
+            alert('見積保存機能が利用できません。kintone-api.jsを確認してください。');
         }
         
         console.log('お見積データ:', {
+            conductId: conductId,
             items: cart,
-            summary: summary
+            summary: { itemCount, subtotal, tax, total }
         });
         
     } catch (error) {
         console.error('見積保存エラー:', error);
-        alert('見積の保存中にエラーが発生しました。ローカルには保存されています。');
+        alert(`見積の保存中にエラーが発生しました:\n${error.message}`);
+    } finally {
+        hideLoading();
     }
 }
 
