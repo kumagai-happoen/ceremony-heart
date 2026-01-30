@@ -72,6 +72,7 @@ function convertProductsData(products) {
 
     return products
         .map((product, index) => {
+            const productId = product.product_id || '';
             const category = product.product_category || '';
             const name = product.product_name || '';
             const price = parseInt(product.price_tax_included || '0');
@@ -92,6 +93,7 @@ function convertProductsData(products) {
 
             return {
                 id: index + 1, // 連番でIDを振る
+                productId: productId, // kintoneの商品ID（hidden）
                 name: name,
                 description: `${name}`, // 説明文（必要に応じて追加フィールドから取得）
                 price: price,
