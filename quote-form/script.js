@@ -197,11 +197,11 @@ function renderCurrentStep() {
     productsGrid.innerHTML = filteredProducts.map(product => {
         const isSelected = cart.some(item => item.id === product.id);
         
-        // 画像表示の決定: imageUrlがあれば画像、なければ絵文字
+        // 画像表示の決定: imageUrlがあれば画像、なければNO IMAGE
         const imageContent = product.imageUrl 
-            ? `<img src="${product.imageUrl}" alt="${product.name}" class="product-image-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-               <span class="product-image-emoji" style="display: none;">${product.emoji}</span>`
-            : `<span class="product-image-emoji">${product.emoji}</span>`;
+            ? `<img src="${product.imageUrl}" alt="${product.name}" class="product-image-img" onerror="this.style.display='none'; this.parentElement.querySelector('.product-no-image').style.display='flex';">
+               <div class="product-no-image" style="display: none;">NO IMAGE</div>`
+            : `<div class="product-no-image">NO IMAGE</div>`;
         
         return `
             <div class="product-card ${isSelected ? 'selected' : ''}" data-product-id="${product.id}">
