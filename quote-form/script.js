@@ -199,7 +199,7 @@ function renderCurrentStep() {
         
         // 画像表示の決定: imageUrlがあれば画像、なければNO IMAGE
         const imageContent = product.imageUrl 
-            ? `<img src="${product.imageUrl}" alt="${product.name}" class="product-image-img" onerror="this.style.display='none'; this.parentElement.querySelector('.product-no-image').style.display='flex';">
+            ? `<img src="${product.imageUrl}" alt="${product.name}" width="100%" height="180" class="product-image-img" onerror="this.style.display='none'; this.parentElement.querySelector('.product-no-image').style.display='flex';">
                <div class="product-no-image" style="display: none;">NO IMAGE</div>`
             : `<div class="product-no-image">NO IMAGE</div>`;
         
