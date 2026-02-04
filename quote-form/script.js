@@ -1,5 +1,6 @@
 // グローバル変数
 let conductId = ''; // 施工ID
+let deceasedName = ''; // 故人名前
 let patterns = []; // 商品パターン一覧
 let productMaster = []; // 商品マスタ
 let currentStep = 1; // 現在のステップ (1: パターン選択, 2: 商品編集, 3: 最終確認)
@@ -19,6 +20,27 @@ async function init() {
     showLoading();
     
     try {
+        // 施工情報と見積データを取得
+        if (typeof fetchConductInfo === 'function') {
+            const conductInfo = await fetchConductInfo(conductId);
+            deceasedName = conductInfo.deceased_name || '';
+            console.log('故人名を取得:', deceasedName);
+            
+            // 既存の見積データがあれば復元
+            if (conductInfo.quote_items && conductInfo.quote_items.length > 0) {
+                console.log('既存の見積データを復元します:', conductInfo.quote_items.length, '件');
+                
+                // 選択された商品パターン情報を保存
+                if (conductInfo.product_pattern_id) {
+                    selectedPattern = {
+                        patternId: conductInfo.product_pattern_id,
+                        patternName: conductInfo.product_pattern_name,
+                        totalAmount: 0 // 後で計算
+                    };
+                }
+            }
+        }
+        
         // 商品パターンマスタを取得
         if (typeof fetchPatternMaster === 'function') {
             patterns = await fetchPatternMaster();
@@ -31,8 +53,24 @@ async function init() {
             console.log('商品マスタを読み込みました:', productMaster.length, '件');
         }
         
-        // ステップ1: 商品パターン選択画面を表示
-        renderStep1();
+        // 既存の見積データがある場合は商品編集画面へ、なければパターン選択画面へ
+        if (selectedPattern && conductInfo.quote_items && conductInfo.quote_items.length > 0) {
+            // カートに商品を復元
+            cart = conductInfo.quote_items.map((item, index) => ({
+                id: index + 1,
+                productCategory: item.product_category,
+                productAttribute: item.product_attribute,
+                productId: item.product_id,
+                productName: item.product_name,
+                price: parseInt(item.price_tax_included || 0),
+                quantity: parseInt(item.quantity || 1),
+                taxRate: item.tax_rate || '10'
+            }));
+            
+            renderStep2(); // 商品編集画面へ
+        } else {
+            renderStep1(); // パターン選択画面へ
+        }
         
     } catch (error) {
         console.error('初期化エラー:', error);
@@ -82,8 +120,11 @@ function renderStep1() {
     
     const container = document.getElementById('app');
     container.innerHTML = `
+        <div class="page-header">
+            <h1 class="header-title">お見積り作成　${deceasedName} 様</h1>
+        </div>
         <div class="step-container">
-            <h1 class="page-title">商品パターンを選択してください</h1>
+            <h2 class="page-title">プランを選択してください</h2>
             <div class="pattern-grid" id="patternGrid"></div>
         </div>
     `;
@@ -97,9 +138,14 @@ function renderStep1() {
     
     grid.innerHTML = patterns.map(pattern => `
         <div class="pattern-card" data-pattern-id="${pattern.product_pattern_id}">
+            <div class="pattern-image">
+                ${pattern.imageUrl 
+                    ? `<img src="${pattern.imageUrl}" alt="${pattern.product_pattern_name}" class="pattern-img">`
+                    : `<div class="pattern-no-image">NO IMAGE</div>`
+                }
+            </div>
             <div class="pattern-card-body">
                 <h3 class="pattern-name">${pattern.product_pattern_name}</h3>
-                <div class="pattern-amount">¥${parseInt(pattern.total_amount || 0).toLocaleString()}</div>
             </div>
             <button class="btn-select-pattern" data-pattern-id="${pattern.product_pattern_id}">
                 選択

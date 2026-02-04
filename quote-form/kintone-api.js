@@ -5,12 +5,46 @@
 
 // Cloudflare Workers設定
 const WORKER_CONFIG = {
+    conductInfoUrl: 'https://get-conduct-info.kkumagai.workers.dev/',
     productPatternMasterUrl: 'https://get-product-pattern-master.kkumagai.workers.dev/',
     productPatternDetailUrl: 'https://get-product-pattern-detail.kkumagai.workers.dev/',
     productMasterUrl: 'https://get-product-master.kkumagai.workers.dev/',
     productImageUrl: 'https://get-product-image.kkumagai.workers.dev/',
     saveQuoteUrl: 'https://save-quote.kkumagai.workers.dev/'
 };
+
+/**
+ * 施工情報と見積データを取得
+ * @param {string} conductId 施工ID
+ * @returns {Promise<Object>} 施工情報と見積データ
+ */
+async function fetchConductInfo(conductId) {
+    try {
+        const response = await fetch(`${WORKER_CONFIG.conductInfoUrl}?conductId=${conductId}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`Workers API エラー: ${response.status} ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        console.log('施工情報と見積データを取得:', data);
+        return data;
+
+    } catch (error) {
+        console.error('施工情報の取得に失敗:', error);
+        return { 
+            deceased_name: '',
+            product_pattern_id: '',
+            product_pattern_name: '',
+            quote_items: []
+        };
+    }
+}
 
 /**
  * 商品パターンマスタを取得
@@ -31,7 +65,14 @@ async function fetchPatternMaster() {
 
         const data = await response.json();
         console.log('商品パターンマスタを取得:', data);
-        return data.patterns || [];
+        
+        // 画像URLを追加
+        return (data.patterns || []).map(pattern => ({
+            ...pattern,
+            imageUrl: pattern.image_files && pattern.image_files.length > 0
+                ? `${WORKER_CONFIG.productImageUrl}?fileKey=${pattern.image_files[0].fileKey}`
+                : null
+        }));
 
     } catch (error) {
         console.error('商品パターンマスタの取得に失敗しました:', error);
@@ -148,9 +189,10 @@ async function saveQuoteToKintone(conductId, patternId, patternName, items) {
 // エクスポート
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
+        fetchConductInfo,
         fetchPatternMaster,
         fetchPatternDetail,
         fetchProductMaster,
-        saveQuoteToKintone
+        saveQuote
     };
 }

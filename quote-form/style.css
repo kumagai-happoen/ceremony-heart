@@ -27,7 +27,28 @@ body {
 #app {
     max-width: 1400px;
     margin: 0 auto;
+    padding: 0;
+}
+
+/* ========================================
+   ヘッダー
+======================================== */
+.page-header {
+    background: var(--primary);
+    color: white;
     padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.header-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+    text-align: center;
+}
+
+.step-container {
+    padding: 0 2rem 2rem;
 }
 
 /* ========================================
@@ -118,6 +139,8 @@ body {
     overflow: hidden;
     cursor: pointer;
     transition: all 0.3s;
+    display: flex;
+    flex-direction: column;
 }
 
 .pattern-card:hover {
@@ -126,21 +149,39 @@ body {
     border-color: var(--primary);
 }
 
+.pattern-image {
+    width: 100%;
+    height: 200px;
+    background: linear-gradient(135deg, #F7FAFC, #EDF2F7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.pattern-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.pattern-no-image {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    letter-spacing: 0.1em;
+}
+
 .pattern-card-body {
     padding: 1.5rem;
+    flex: 1;
 }
 
 .pattern-name {
     font-size: 1.1rem;
     font-weight: 600;
-    margin-bottom: 0.5rem;
     color: var(--text-primary);
-}
-
-.pattern-amount {
-    font-size: 1.3rem;
-    font-weight: 700;
-    color: var(--primary);
+    text-align: center;
 }
 
 .btn-select-pattern {
