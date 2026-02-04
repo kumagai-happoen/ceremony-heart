@@ -7,67 +7,9 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header class="header">
-        <div class="header-content">
-            <div class="header-top">
-                <div class="logo">お見積り</div>
-                <div class="cart-summary">
-                    <div class="cart-info">
-                        <div class="cart-count">選択項目: <span id="headerCartCount">0</span>件</div>
-                        <div class="cart-total">¥<span id="headerCartTotal">0</span></div>
-                    </div>
-                </div>
-            </div>
-            <div class="step-indicator" id="stepIndicator"></div>
-        </div>
-    </header>
-
-    <div class="main-container">
-        <div class="products-section">
-            <div class="step-header">
-                <h2 class="step-title" id="stepTitle">ステップ1: プランを選択</h2>
-                <div class="step-navigation">
-                    <button class="btn-step btn-prev" id="btnPrev" style="display: none;">← 前のステップ</button>
-                    <button class="btn-step btn-next" id="btnNext" style="display: none;">次のステップ →</button>
-                </div>
-            </div>
-            <div class="products-grid" id="productsGrid"></div>
-        </div>
-
-        <div class="cart-sidebar">
-            <div class="cart-title">
-                <span class="cart-icon">📋</span>
-                選択項目
-            </div>
-            <div class="cart-items" id="cartItems">
-                <div class="cart-empty">
-                    <div class="cart-empty-icon">📄</div>
-                    <div>項目を選択してください</div>
-                </div>
-            </div>
-            <div class="cart-summary-details" id="cartSummary" style="display: none;">
-                <div class="summary-row">
-                    <span>小計</span>
-                    <span>¥<span id="subtotal">0</span></span>
-                </div>
-                <div class="summary-row">
-                    <span>消費税(10%)</span>
-                    <span>¥<span id="tax">0</span></span>
-                </div>
-                <div class="summary-row total">
-                    <span>合計金額</span>
-                    <span>¥<span id="total">0</span></span>
-                </div>
-                <button class="btn-create-quote" id="btnCreateQuote" disabled>
-                    確定
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- kintone API連携スクリプトを先に読み込む -->
+    <div id="app"></div>
+    
     <script src="kintone-api.js"></script>
-    <!-- メインスクリプト -->
     <script src="script.js"></script>
 </body>
 </html>

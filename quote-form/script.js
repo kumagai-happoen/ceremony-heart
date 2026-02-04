@@ -1,32 +1,10 @@
-// ステップ定義
-const steps = [
-    { id: 1, name: 'プラン', category: 'plan', required: true },
-    { id: 2, name: '棺', category: 'casket_only', required: true },
-    { id: 3, name: '祭壇', category: 'altar', required: true },
-    { id: 4, name: '供花・供物', category: 'flower', required: false },
-    { id: 5, name: 'お食事', category: 'service', required: false },
-    { id: 6, name: 'その他', category: 'other', required: false }
-];
-
-// 商品データ（kintoneから取得後に上書きされる）
-let products = [];
-
-// カート状態管理
-let cart = [];
-let currentStepIndex = 0;
-
-// 施工ID（URLパラメータから取得）
-let conductId = '';
-
-// DOM要素
-const stepIndicator = document.getElementById('stepIndicator');
-const stepTitle = document.getElementById('stepTitle');
-const productsGrid = document.getElementById('productsGrid');
-const cartItemsContainer = document.getElementById('cartItems');
-const cartSummary = document.getElementById('cartSummary');
-const btnPrev = document.getElementById('btnPrev');
-const btnNext = document.getElementById('btnNext');
-const btnCreateQuote = document.getElementById('btnCreateQuote');
+// グローバル変数
+let conductId = ''; // 施工ID
+let patterns = []; // 商品パターン一覧
+let productMaster = []; // 商品マスタ
+let currentStep = 1; // 現在のステップ (1: パターン選択, 2: 商品編集, 3: 最終確認)
+let selectedPattern = null; // 選択された商品パターン
+let cart = []; // カート（商品一覧）
 
 // 初期化
 async function init() {
@@ -38,40 +16,27 @@ async function init() {
         alert('施工IDが指定されていません。URLに?id=xxxを追加してください。');
     }
     
-    // ローディング表示
     showLoading();
     
     try {
-        // kintoneから商品データを取得
-        // initializeProducts関数はkintone-api.jsで定義されている
-        if (typeof initializeProducts === 'function') {
-            products = await initializeProducts(true);
-            console.log('商品データを読み込みました:', products.length, '件');
-        } else {
-            console.warn('kintone-api.jsが読み込まれていません。固定データを使用します。');
-            products = getDefaultProducts();
+        // 商品パターンマスタを取得
+        if (typeof fetchPatternMaster === 'function') {
+            patterns = await fetchPatternMaster();
+            console.log('商品パターンマスタを読み込みました:', patterns.length, '件');
         }
         
-        // 施工IDがある場合、既存の見積データを復元
-        if (conductId && typeof getQuoteFromKintone === 'function') {
-            console.log('既存の見積データを取得中...');
-            const quoteItems = await getQuoteFromKintone(conductId);
-            
-            if (quoteItems.length > 0) {
-                console.log('見積データを復元します:', quoteItems.length, '件');
-                restoreQuoteToCart(quoteItems);
-            }
+        // 商品マスタを取得
+        if (typeof fetchProductMaster === 'function') {
+            productMaster = await fetchProductMaster();
+            console.log('商品マスタを読み込みました:', productMaster.length, '件');
         }
         
-        // UIを初期化
-        renderStepIndicator();
-        renderCurrentStep();
-        updateCart();
-        setupEventListeners();
+        // ステップ1: 商品パターン選択画面を表示
+        renderStep1();
         
     } catch (error) {
         console.error('初期化エラー:', error);
-        alert('商品データの読み込みに失敗しました。ページを再読み込みしてください。');
+        alert('データの読み込みに失敗しました。ページを再読み込みしてください。');
     } finally {
         hideLoading();
     }
@@ -94,7 +59,7 @@ function showLoading() {
         ">
             <div style="text-align: center;">
                 <div style="font-size: 3rem; margin-bottom: 1rem;">⏳</div>
-                <div style="font-size: 1.2rem; color: #4A5568;">商品データを読み込んでいます...</div>
+                <div style="font-size: 1.2rem; color: #4A5568;">データを読み込んでいます...</div>
             </div>
         </div>
     `;
@@ -109,471 +74,89 @@ function hideLoading() {
     }
 }
 
-// デフォルト商品データ（フォールバック用）
-function getDefaultProducts() {
-    return [
-        {
-            id: 1,
-            name: '一般葬プラン',
-            description: '通夜・告別式を含む伝統的な葬儀',
-            price: 580000,
-            category: 'plan',
-            emoji: '🏛️'
-        },
-        {
-            id: 2,
-            name: '家族葬プラン',
-            description: 'ご家族・親族中心の小規模葬儀',
-            price: 420000,
-            category: 'plan',
-            emoji: '🏠'
-        },
-        {
-            id: 3,
-            name: '一日葬プラン',
-            description: '通夜を行わず告別式のみ',
-            price: 350000,
-            category: 'plan',
-            emoji: '⛪'
-        }
-    ];
-}
-
-// イベントリスナー設定
-function setupEventListeners() {
-    btnPrev.addEventListener('click', goToPrevStep);
-    btnNext.addEventListener('click', goToNextStep);
-    btnCreateQuote.addEventListener('click', createQuote);
-}
-
-// 見積データをカートに復元
-function restoreQuoteToCart(quoteItems) {
-    cart = []; // カートをクリア
+// ========================================
+// ステップ1: 商品パターン選択
+// ========================================
+function renderStep1() {
+    currentStep = 1;
     
-    quoteItems.forEach(item => {
-        // 商品IDで商品マスタから商品を検索
-        const product = products.find(p => p.productId === item.product_id);
-        
-        if (product) {
-            cart.push({
-                ...product,
-                quantity: parseInt(item.quantity) || 1
-            });
-        } else {
-            console.warn('商品が見つかりません:', item.product_id, item.product_name);
-        }
-    });
-    
-    console.log('カートを復元しました:', cart);
-}
-
-// 現在のステップのカテゴリに該当する商品がカートにあるかチェック
-function isCurrentStepCompleted() {
-    const currentStep = steps[currentStepIndex];
-    return cart.some(item => item.category === currentStep.category);
-}
-
-// すべての必須ステップが完了しているかチェック
-function areAllRequiredStepsCompleted() {
-    return steps
-        .filter(step => step.required)
-        .every(step => cart.some(item => item.category === step.category));
-}
-
-// ステップインジケーター表示
-function renderStepIndicator() {
-    stepIndicator.innerHTML = `
-        <div class="step-indicator-content">
-            ${steps.map((step, index) => {
-                const isCompleted = cart.some(item => item.category === step.category);
-                const isActive = index === currentStepIndex;
-                const classes = ['step-item'];
-                if (isCompleted) classes.push('completed');
-                if (isActive) classes.push('active');
-                
-                return `
-                    <div class="${classes.join(' ')}" data-step="${index}">
-                        <div class="step-number">${isCompleted ? '✓' : step.id}</div>
-                        <div class="step-label">${step.name}</div>
-                    </div>
-                `;
-            }).join('')}
+    const container = document.getElementById('app');
+    container.innerHTML = `
+        <div class="step-container">
+            <h1 class="page-title">商品パターンを選択してください</h1>
+            <div class="pattern-grid" id="patternGrid"></div>
         </div>
     `;
-}
-
-// 現在のステップを表示
-function renderCurrentStep() {
-    const currentStep = steps[currentStepIndex];
-    stepTitle.textContent = currentStep.name;
     
-    // ナビゲーションボタンの表示制御
-    btnPrev.style.display = currentStepIndex > 0 ? 'block' : 'none';
+    const grid = document.getElementById('patternGrid');
     
-    // 次へボタンの表示と有効化制御
-    if (currentStepIndex < steps.length - 1) {
-        btnNext.style.display = 'block';
-        // 必須ステップの場合は選択が必須
-        if (currentStep.required) {
-            btnNext.disabled = !isCurrentStepCompleted();
-        } else {
-            btnNext.disabled = false;
-        }
-    } else {
-        btnNext.style.display = 'none';
-    }
-    
-    // 商品を表示
-    const filteredProducts = products.filter(p => p.category === currentStep.category);
-    
-    if (filteredProducts.length === 0) {
-        productsGrid.innerHTML = `
-            <div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: #718096;">
-                <div style="font-size: 3rem; margin-bottom: 1rem;">📦</div>
-                <div>このカテゴリには商品がありません</div>
-            </div>
-        `;
-        // 商品がない場合でも確定ボタンの制御を更新
-        updateConfirmButtonState();
+    if (patterns.length === 0) {
+        grid.innerHTML = '<div class="empty-message">商品パターンが見つかりません</div>';
         return;
     }
     
-    productsGrid.innerHTML = filteredProducts.map(product => {
-        const isSelected = cart.some(item => item.id === product.id);
-        
-        // 画像表示の決定: imageUrlがあれば画像、なければNO IMAGE
-        const imageContent = product.imageUrl 
-            ? `<img src="${product.imageUrl}" alt="${product.name}" width="100%" height="220" class="product-image-img" onerror="this.style.display='none'; this.parentElement.querySelector('.product-no-image').style.display='flex';">
-               <div class="product-no-image" style="display: none;">NO IMAGE</div>`
-            : `<div class="product-no-image">NO IMAGE</div>`;
-        
-        return `
-            <div class="product-card ${isSelected ? 'selected' : ''}" data-product-id="${product.id}">
-                <div class="product-image">
-                    ${imageContent}
-                </div>
-                <div class="product-info">
-                    <div class="product-name">${product.name}</div>
-                    <div class="product-footer">
-                        <div class="product-price">¥${product.price.toLocaleString()}</div>
-                        <button class="btn-add ${isSelected ? 'selected' : ''}" data-product-id="${product.id}">
-                            ${isSelected ? '選択中' : '選択'}
-                        </button>
-                    </div>
-                </div>
+    grid.innerHTML = patterns.map(pattern => `
+        <div class="pattern-card" data-pattern-id="${pattern.pattern_id}">
+            <div class="pattern-card-body">
+                <h3 class="pattern-name">${pattern.pattern_name}</h3>
+                <div class="pattern-amount">¥${parseInt(pattern.total_amount || 0).toLocaleString()}</div>
             </div>
-        `;
-    }).join('');
-
-    // 追加ボタンにイベントリスナーを設定
-    document.querySelectorAll('.btn-add').forEach(btn => {
-        btn.addEventListener('click', (e) => {
+            <button class="btn-select-pattern" data-pattern-id="${pattern.pattern_id}">
+                選択
+            </button>
+        </div>
+    `).join('');
+    
+    // パターン選択ボタンのイベント
+    document.querySelectorAll('.btn-select-pattern').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
             e.stopPropagation();
-            const productId = parseInt(btn.dataset.productId);
-            toggleProduct(productId);
+            const patternId = btn.dataset.patternId;
+            await selectPattern(patternId);
         });
     });
-
+    
     // カード全体のクリックイベント
-    document.querySelectorAll('.product-card').forEach(card => {
-        card.addEventListener('click', () => {
-            const productId = parseInt(card.dataset.productId);
-            toggleProduct(productId);
+    document.querySelectorAll('.pattern-card').forEach(card => {
+        card.addEventListener('click', async () => {
+            const patternId = card.dataset.patternId;
+            await selectPattern(patternId);
         });
     });
-    
-    // ステップ表示時に確定ボタンの状態を更新
-    updateConfirmButtonState();
 }
 
-// 商品の選択/解除を切り替え
-function toggleProduct(productId) {
-    const product = products.find(p => p.id === productId);
-    const currentStep = steps[currentStepIndex];
+// 商品パターンを選択
+async function selectPattern(patternId) {
+    showLoading();
     
-    // 必須ステップの場合、同じカテゴリの他の商品を削除（単一選択）
-    if (currentStep.required) {
-        cart = cart.filter(item => item.category !== currentStep.category);
-    }
-    
-    const existingItem = cart.find(item => item.id === productId);
-    
-    if (existingItem) {
-        // すでに選択されている場合は削除
-        cart = cart.filter(item => item.id !== productId);
-        updateCart();
-        renderStepIndicator();
-        renderCurrentStep();
-    } else {
-        // 新規選択
-        // 任意ステップの場合は数量入力モーダルを表示
-        if (!currentStep.required) {
-            showQuantityModal(product);
-        } else {
-            // 必須ステップは数量1で追加
-            cart.push({
-                ...product,
-                quantity: 1
-            });
-            updateCart();
-            renderStepIndicator();
-            renderCurrentStep();
-        }
-    }
-    
-    // フィードバックアニメーション
-    const cartIcon = document.querySelector('.cart-icon');
-    if (cartIcon) {
-        cartIcon.classList.add('pulse');
-        setTimeout(() => cartIcon.classList.remove('pulse'), 400);
-    }
-}
-
-// 数量入力モーダルを表示
-function showQuantityModal(product) {
-    const modal = document.createElement('div');
-    modal.id = 'quantityModal';
-    modal.className = 'quantity-modal-overlay';
-    modal.innerHTML = `
-        <div class="quantity-modal">
-            <div class="quantity-modal-header">
-                <h3>${product.name}</h3>
-                <button class="quantity-modal-close" onclick="closeQuantityModal()">×</button>
-            </div>
-            <div class="quantity-modal-body">
-                <label for="quantityInput">数量を入力してください</label>
-                <input type="number" id="quantityInput" min="1" value="1" class="quantity-input" autofocus>
-            </div>
-            <div class="quantity-modal-footer">
-                <button class="btn-modal-cancel" onclick="closeQuantityModal()">キャンセル</button>
-                <button class="btn-modal-confirm" onclick="confirmQuantity(${product.id})">追加</button>
-            </div>
-        </div>
-    `;
-    document.body.appendChild(modal);
-    
-    // 入力フィールドにフォーカス
-    setTimeout(() => {
-        const input = document.getElementById('quantityInput');
-        input.focus();
-        input.select();
-        
-        // Enterキーで確定
-        input.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                confirmQuantity(product.id);
-            }
-        });
-    }, 100);
-}
-
-// 数量入力モーダルを閉じる
-function closeQuantityModal() {
-    const modal = document.getElementById('quantityModal');
-    if (modal) {
-        modal.remove();
-    }
-}
-
-// 数量を確定してカートに追加
-function confirmQuantity(productId) {
-    const input = document.getElementById('quantityInput');
-    const quantity = parseInt(input.value);
-    
-    if (!quantity || quantity < 1) {
-        alert('1以上の数量を入力してください');
-        return;
-    }
-    
-    const product = products.find(p => p.id === productId);
-    
-    // カートに追加
-    cart.push({
-        ...product,
-        quantity: quantity
-    });
-    
-    closeQuantityModal();
-    updateCart();
-    renderStepIndicator();
-    renderCurrentStep();
-}
-
-// 前のステップへ
-function goToPrevStep() {
-    if (currentStepIndex > 0) {
-        currentStepIndex--;
-        renderStepIndicator();
-        renderCurrentStep();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-}
-
-// 次のステップへ
-function goToNextStep() {
-    const currentStep = steps[currentStepIndex];
-    
-    // 必須ステップで未選択の場合は進めない
-    if (currentStep.required && !isCurrentStepCompleted()) {
-        alert(`${currentStep.name}を選択してください`);
-        return;
-    }
-    
-    if (currentStepIndex < steps.length - 1) {
-        currentStepIndex++;
-        renderStepIndicator();
-        renderCurrentStep();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-}
-
-// 数量変更
-function updateQuantity(productId, delta) {
-    const item = cart.find(item => item.id === productId);
-    const product = products.find(p => p.id === productId);
-    const step = steps.find(s => s.category === product.category);
-    
-    // 必須ステップの場合は数量変更不可
-    if (step && step.required) {
-        return;
-    }
-    
-    if (item) {
-        item.quantity += delta;
-        if (item.quantity <= 0) {
-            cart = cart.filter(item => item.id !== productId);
-        }
-        updateCart();
-        renderStepIndicator();
-        renderCurrentStep();
-    }
-}
-
-// カート表示更新
-function updateCart() {
-    if (cart.length === 0) {
-        cartItemsContainer.innerHTML = `
-            <div class="cart-empty">
-                <div class="cart-empty-icon">📄</div>
-                <div>項目を選択してください</div>
-            </div>
-        `;
-        cartSummary.style.display = 'none';
-    } else {
-        cartItemsContainer.innerHTML = cart.map(item => {
-            const product = products.find(p => p.id === item.id);
-            const step = steps.find(s => s.category === product.category);
-            const isRequired = step && step.required;
-            
-            // 画像またはNO IMAGE表示
-            const imageContent = item.imageUrl 
-                ? `<img src="${item.imageUrl}" alt="${item.name}" class="cart-item-image">`
-                : `<div class="cart-item-no-image">NO IMAGE</div>`;
-            
-            return `
-                <div class="cart-item">
-                    ${imageContent}
-                    <div class="cart-item-info">
-                        <div class="cart-item-name">${item.name}</div>
-                        <div class="cart-item-price">¥${item.price.toLocaleString()}</div>
-                    </div>
-                    <div class="cart-item-controls">
-                        ${!isRequired ? `
-                        <button class="quantity-btn" data-product-id="${item.id}" data-action="decrease">−</button>
-                        <div class="quantity-display">${item.quantity}</div>
-                        <button class="quantity-btn" data-product-id="${item.id}" data-action="increase">+</button>
-                        ` : `<div class="quantity-fixed">×1</div>`}
-                    </div>
-                </div>
-            `;
-        }).join('');
-
-        // 数量ボタンにイベントリスナーを設定
-        document.querySelectorAll('.quantity-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const productId = parseInt(btn.dataset.productId);
-                const action = btn.dataset.action;
-                const delta = action === 'increase' ? 1 : -1;
-                updateQuantity(productId, delta);
-            });
-        });
-
-        cartSummary.style.display = 'block';
-    }
-
-    // 合計計算
-    const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const tax = Math.floor(subtotal * 0.1);
-    const total = subtotal + tax;
-    const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
-
-    // 表示更新
-    document.getElementById('subtotal').textContent = subtotal.toLocaleString();
-    document.getElementById('tax').textContent = tax.toLocaleString();
-    document.getElementById('total').textContent = total.toLocaleString();
-    document.getElementById('headerCartCount').textContent = itemCount;
-    document.getElementById('headerCartTotal').textContent = total.toLocaleString();
-    
-    // 確定ボタンの有効化制御
-    updateConfirmButtonState();
-}
-
-// 確定ボタンの有効化状態を更新
-function updateConfirmButtonState() {
-    // 全必須ステップ完了 かつ 最後のステップ（その他）に到達している場合のみ有効化
-    const allRequiredCompleted = areAllRequiredStepsCompleted();
-    const lastStepIndex = steps.length - 1; // 5（その他）
-    const reachedLastStep = currentStepIndex >= lastStepIndex;
-    console.log('確定ボタン制御:', {
-        currentStepIndex,
-        lastStepIndex,
-        totalSteps: steps.length,
-        allRequiredCompleted,
-        reachedLastStep,
-        willEnable: allRequiredCompleted && reachedLastStep
-    });
-    btnCreateQuote.disabled = !(allRequiredCompleted && reachedLastStep);
-}
-
-// 見積作成
-async function createQuote() {
-    if (!areAllRequiredStepsCompleted()) {
-        alert('すべての必須項目を選択してください');
-        return;
-    }
-    
-    if (!conductId) {
-        alert('施工IDが設定されていません');
-        return;
-    }
-
-    const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
-    const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const tax = Math.floor(subtotal * 0.1);
-    const total = subtotal + tax;
-
     try {
-        // ローディング表示
-        showLoading();
+        // 商品パターン詳細を取得
+        const detail = await fetchPatternDetail(patternId);
         
-        // kintoneに見積データを保存
-        if (typeof saveQuoteToKintone === 'function') {
-            console.log('kintoneに見積データを保存中...');
-            await saveQuoteToKintone(conductId, cart);
-            alert(`お見積内容を保存しました。\n\n選択項目: ${itemCount}件\n合計金額: ¥${total.toLocaleString()}`);
-        } else {
-            alert('見積保存機能が利用できません。kintone-api.jsを確認してください。');
-        }
+        selectedPattern = {
+            patternId: detail.pattern_id,
+            patternName: detail.pattern_name,
+            totalAmount: detail.total_amount
+        };
         
-        console.log('お見積データ:', {
-            conductId: conductId,
-            items: cart,
-            summary: { itemCount, subtotal, tax, total }
-        });
+        // カートに商品を展開
+        cart = (detail.products || []).map((product, index) => ({
+            id: index + 1,
+            productCategory: product.product_category,
+            productAttribute: product.product_attribute,
+            productId: product.product_id,
+            productName: product.product_name,
+            price: parseInt(product.price_tax_included || 0),
+            quantity: parseInt(product.quantity || 1),
+            taxRate: product.tax_rate || '10'
+        }));
+        
+        // ステップ2へ
+        renderStep2();
         
     } catch (error) {
-        console.error('見積保存エラー:', error);
-        alert(`見積の保存中にエラーが発生しました:\n${error.message}`);
+        console.error('パターン選択エラー:', error);
+        alert('商品パターンの読み込みに失敗しました');
     } finally {
         hideLoading();
     }
@@ -581,3 +164,263 @@ async function createQuote() {
 
 // 初期化実行
 document.addEventListener('DOMContentLoaded', init);
+
+// ========================================
+// ステップ2: 商品編集
+// ========================================
+function renderStep2() {
+    currentStep = 2;
+    
+    const container = document.getElementById('app');
+    container.innerHTML = `
+        <div class="step-container">
+            <div class="step-header-bar">
+                <h1 class="page-title">${selectedPattern.patternName}</h1>
+                <button class="btn-back" onclick="renderStep1()">← パターン選択に戻る</button>
+            </div>
+            
+            <div class="cart-section">
+                <h2 class="section-title">商品一覧</h2>
+                <div class="cart-list" id="cartList"></div>
+                <button class="btn-add-product" onclick="showProductModal()">+ 商品を追加</button>
+            </div>
+            
+            <div class="summary-section">
+                <div class="summary-row">
+                    <span>合計金額</span>
+                    <span class="summary-total">¥<span id="totalAmount">0</span></span>
+                </div>
+                <button class="btn-primary" onclick="renderStep3()">確認画面へ</button>
+            </div>
+        </div>
+        
+        <!-- 商品追加モーダル -->
+        <div id="productModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>商品を追加</h2>
+                    <button class="modal-close" onclick="closeProductModal()">×</button>
+                </div>
+                <div class="modal-body">
+                    <input type="text" id="productSearch" placeholder="商品名で検索..." class="search-input">
+                    <div class="product-list" id="productList"></div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    updateCartDisplay();
+}
+
+// カート表示更新
+function updateCartDisplay() {
+    const cartList = document.getElementById('cartList');
+    if (!cartList) return;
+    
+    if (cart.length === 0) {
+        cartList.innerHTML = '<div class="empty-message">商品がありません</div>';
+    } else {
+        cartList.innerHTML = cart.map(item => `
+            <div class="cart-item">
+                <div class="cart-item-info">
+                    <div class="cart-item-name">${item.productName}</div>
+                    <div class="cart-item-details">
+                        ${item.productCategory} / ${item.productAttribute} / 税率${item.taxRate}%
+                    </div>
+                    <div class="cart-item-price">¥${item.price.toLocaleString()}</div>
+                </div>
+                <div class="cart-item-controls">
+                    <button class="qty-btn" onclick="updateQuantity(${item.id}, -1)">−</button>
+                    <span class="qty-display">${item.quantity}</span>
+                    <button class="qty-btn" onclick="updateQuantity(${item.id}, 1)">+</button>
+                    <button class="btn-remove" onclick="removeItem(${item.id})">削除</button>
+                </div>
+            </div>
+        `).join('');
+    }
+    
+    // 合計金額を更新
+    const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const totalElement = document.getElementById('totalAmount');
+    if (totalElement) {
+        totalElement.textContent = total.toLocaleString();
+    }
+}
+
+// 数量変更
+function updateQuantity(itemId, delta) {
+    const item = cart.find(i => i.id === itemId);
+    if (item) {
+        item.quantity += delta;
+        if (item.quantity < 1) item.quantity = 1;
+        updateCartDisplay();
+    }
+}
+
+// 商品削除
+function removeItem(itemId) {
+    if (confirm('この商品を削除しますか？')) {
+        cart = cart.filter(i => i.id !== itemId);
+        updateCartDisplay();
+    }
+}
+
+// 商品追加モーダル表示
+function showProductModal() {
+    const modal = document.getElementById('productModal');
+    modal.style.display = 'flex';
+    
+    renderProductList();
+    
+    // 検索イベント
+    const searchInput = document.getElementById('productSearch');
+    searchInput.addEventListener('input', (e) => {
+        renderProductList(e.target.value);
+    });
+}
+
+// 商品追加モーダル閉じる
+function closeProductModal() {
+    const modal = document.getElementById('productModal');
+    modal.style.display = 'none';
+}
+
+// 商品リスト表示
+function renderProductList(searchTerm = '') {
+    const productList = document.getElementById('productList');
+    
+    const filtered = productMaster.filter(p => 
+        searchTerm === '' || p.productName.includes(searchTerm)
+    );
+    
+    if (filtered.length === 0) {
+        productList.innerHTML = '<div class="empty-message">商品が見つかりません</div>';
+        return;
+    }
+    
+    productList.innerHTML = filtered.map(product => `
+        <div class="product-item" onclick="addProductToCart('${product.productId}')">
+            ${product.imageUrl ? `<img src="${product.imageUrl}" class="product-thumb">` : '<div class="product-thumb-placeholder">NO IMAGE</div>'}
+            <div class="product-item-info">
+                <div class="product-item-name">${product.productName}</div>
+                <div class="product-item-price">¥${product.price.toLocaleString()}</div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// 商品をカートに追加
+function addProductToCart(productId) {
+    const product = productMaster.find(p => p.productId === productId);
+    if (!product) return;
+    
+    // すでにカートにある場合は数量を増やす
+    const existing = cart.find(i => i.productId === productId);
+    if (existing) {
+        existing.quantity++;
+    } else {
+        cart.push({
+            id: Date.now(),
+            productCategory: product.productCategory,
+            productAttribute: product.productAttribute,
+            productId: product.productId,
+            productName: product.productName,
+            price: product.price,
+            quantity: 1,
+            taxRate: product.taxRate
+        });
+    }
+    
+    updateCartDisplay();
+    closeProductModal();
+}
+
+// ========================================
+// ステップ3: 最終確認
+// ========================================
+function renderStep3() {
+    currentStep = 3;
+    
+    const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    
+    const container = document.getElementById('app');
+    container.innerHTML = `
+        <div class="step-container">
+            <h1 class="page-title">見積内容の確認</h1>
+            
+            <div class="confirm-section">
+                <h2 class="section-title">商品パターン</h2>
+                <div class="confirm-pattern">${selectedPattern.patternName}</div>
+            </div>
+            
+            <div class="confirm-section">
+                <h2 class="section-title">商品一覧（${cart.length}件）</h2>
+                <div class="confirm-list">
+                    ${cart.map(item => `
+                        <div class="confirm-item">
+                            <div class="confirm-item-name">${item.productName}</div>
+                            <div class="confirm-item-details">
+                                ${item.productCategory} / ${item.productAttribute} / 
+                                ¥${item.price.toLocaleString()} × ${item.quantity} = 
+                                ¥${(item.price * item.quantity).toLocaleString()}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+            
+            <div class="confirm-total">
+                <span>合計金額</span>
+                <span class="total-amount">¥${total.toLocaleString()}</span>
+            </div>
+            
+            <div class="confirm-actions">
+                <button class="btn-secondary" onclick="renderStep2()">← 戻る</button>
+                <button class="btn-primary" onclick="saveQuote()">保存</button>
+            </div>
+        </div>
+    `;
+}
+
+// 見積保存
+async function saveQuote() {
+    if (!conductId) {
+        alert('施工IDが設定されていません');
+        return;
+    }
+    
+    if (cart.length === 0) {
+        alert('商品が選択されていません');
+        return;
+    }
+    
+    showLoading();
+    
+    try {
+        const items = cart.map(item => ({
+            productCategory: item.productCategory,
+            productAttribute: item.productAttribute,
+            productId: item.productId,
+            productName: item.productName,
+            price: item.price,
+            quantity: item.quantity,
+            taxRate: item.taxRate
+        }));
+        
+        await saveQuoteToKintone(
+            conductId,
+            selectedPattern.patternId,
+            selectedPattern.patternName,
+            items
+        );
+        
+        alert('見積を保存しました');
+        
+    } catch (error) {
+        console.error('保存エラー:', error);
+        alert('見積の保存に失敗しました: ' + error.message);
+    } finally {
+        hideLoading();
+    }
+}
+

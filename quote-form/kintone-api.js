@@ -1,41 +1,77 @@
 /**
  * kintone API連携モジュール（Cloudflare Workers経由）
- * 商品マスタからデータを取得して見積画面に表示
+ * 商品パターン・商品マスタからデータを取得して見積画面に表示
  */
 
 // Cloudflare Workers設定
 const WORKER_CONFIG = {
+    productPatternMasterUrl: 'https://get-product-pattern-master.kkumagai.workers.dev/',
+    productPatternDetailUrl: 'https://get-product-pattern-detail.kkumagai.workers.dev/',
     productMasterUrl: 'https://get-product-master.kkumagai.workers.dev/',
     productImageUrl: 'https://get-product-image.kkumagai.workers.dev/',
-    saveQuoteUrl: 'https://save-quote.kkumagai.workers.dev/',
-    getQuoteUrl: 'https://get-quote.kkumagai.workers.dev/'
-};
-
-// カテゴリーマッピング（kintoneの商品カテゴリとsteps定義のカテゴリを紐付け）
-const CATEGORY_MAPPING = {
-    'プラン': 'plan',
-    '棺': 'casket_only',
-    '祭壇': 'altar',
-    '供花・供物': 'flower',
-    'お食事': 'service',
-    'その他': 'other'
-};
-
-// 絵文字マッピング（カテゴリごとのデフォルト絵文字）
-const EMOJI_MAPPING = {
-    'plan': '🏛️',
-    'casket_only': '⚰️',
-    'altar': '🎋',
-    'flower': '🌸',
-    'service': '🍱',
-    'other': '📜'
+    saveQuoteUrl: 'https://save-quote.kkumagai.workers.dev/'
 };
 
 /**
- * Cloudflare Workers経由で商品マスタを取得
+ * 商品パターンマスタを取得
+ * @returns {Promise<Array>} 商品パターンの配列
+ */
+async function fetchPatternMaster() {
+    try {
+        const response = await fetch(WORKER_CONFIG.productPatternMasterUrl, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`Workers API エラー: ${response.status} ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        console.log('商品パターンマスタを取得:', data);
+        return data.patterns || [];
+
+    } catch (error) {
+        console.error('商品パターンマスタの取得に失敗しました:', error);
+        return [];
+    }
+}
+
+/**
+ * 商品パターン詳細を取得
+ * @param {string} productPatternId 商品パターンID
+ * @returns {Promise<Object>} 商品パターン詳細
+ */
+async function fetchPatternDetail(productPatternId) {
+    try {
+        const response = await fetch(`${WORKER_CONFIG.productPatternDetailUrl}?productPatternId=${productPatternId}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`Workers API エラー: ${response.status} ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        console.log('商品パターン詳細を取得:', data);
+        return data;
+
+    } catch (error) {
+        console.error('商品パターン詳細の取得に失敗しました:', error);
+        throw error;
+    }
+}
+
+/**
+ * 商品マスタを取得
  * @returns {Promise<Array>} 商品データの配列
  */
-async function fetchProductsFromKintone() {
+async function fetchProductMaster() {
     try {
         const response = await fetch(WORKER_CONFIG.productMasterUrl, {
             method: 'GET',
@@ -49,195 +85,38 @@ async function fetchProductsFromKintone() {
         }
 
         const data = await response.json();
-        console.log('Workersから取得したデータ:', data);
-
-        // 商品データを変換
-        return convertProductsData(data.products);
+        console.log('商品マスタを取得:', data);
+        
+        // 商品マスタのデータを変換
+        return (data.products || []).map((product, index) => ({
+            id: index + 1,
+            productCategory: product.product_category || '',
+            productAttribute: product.product_attribute || '',
+            productId: product.product_id || '',
+            productName: product.product_name || '',
+            price: parseInt(product.price_tax_included || '0'),
+            taxRate: product.tax_rate || '10',
+            imageUrl: product.image_files && product.image_files.length > 0 
+                ? `${WORKER_CONFIG.productImageUrl}?fileKey=${product.image_files[0].fileKey}` 
+                : null
+        }));
 
     } catch (error) {
         console.error('商品マスタの取得に失敗しました:', error);
-        // エラー時は空配列を返す
         return [];
     }
 }
 
 /**
- * Workersから取得した商品データを変換
- * @param {Array} products 商品データ配列
- * @returns {Array} 変換後の商品データ配列
- */
-function convertProductsData(products) {
-    if (!products || !Array.isArray(products)) {
-        console.warn('商品データが配列ではありません:', products);
-        return [];
-    }
-
-    // デバッグ: 最初の商品データを確認
-    if (products.length > 0) {
-        console.log('取得した商品データ（1件目）:', products[0]);
-    }
-
-    return products
-        .map((product, index) => {
-            const productId = product.product_id || '';
-            const category = product.product_category || '';
-            const name = product.product_name || '';
-            const searchWord = product.search_word || `${productId} ${name}`; // 検索ワードを取得（なければ生成）
-            const price = parseInt(product.price_tax_included || '0');
-            const displayOrder = parseInt(product.display_order || '999');
-            
-            // 画像ファイル情報を取得
-            const imageFiles = product.image_files || [];
-            // WorkersのプロキシURL経由で画像を取得
-            const imageUrl = imageFiles.length > 0 
-                ? `${WORKER_CONFIG.productImageUrl}?fileKey=${imageFiles[0].fileKey}` 
-                : null;
-
-            // カテゴリをマッピング
-            const mappedCategory = CATEGORY_MAPPING[category] || 'other';
-            
-            // 絵文字を設定
-            const emoji = EMOJI_MAPPING[mappedCategory] || '📦';
-
-            return {
-                id: index + 1, // 連番でIDを振る
-                productId: productId, // kintoneの商品ID（hidden）
-                searchWord: searchWord, // kintoneの検索ワード（ルックアップ用）
-                name: name,
-                description: `${name}`, // 説明文（必要に応じて追加フィールドから取得）
-                price: price,
-                category: mappedCategory,
-                emoji: emoji,
-                displayOrder: displayOrder,
-                imageUrl: imageUrl, // 画像URL（認証が必要なので注意）
-                imageFiles: imageFiles // 画像ファイル情報
-            };
-        })
-        .filter(product => product.name && product.price > 0) // 名前と価格が有効な商品のみ
-        .sort((a, b) => {
-            // カテゴリごとに表示順序でソート
-            if (a.category !== b.category) {
-                const categoryOrder = ['plan', 'casket_only', 'altar', 'flower', 'service', 'other'];
-                return categoryOrder.indexOf(a.category) - categoryOrder.indexOf(b.category);
-            }
-            return a.displayOrder - b.displayOrder;
-        });
-}
-
-/**
- * 商品データを初期化（Workersから取得または固定データ使用）
- * @param {boolean} useWorkers Workersからデータを取得するかどうか
- * @returns {Promise<Array>} 商品データ配列
- */
-async function initializeProducts(useWorkers = true) {
-    if (useWorkers) {
-        console.log('Workersから商品マスタを取得します...');
-        const workerProducts = await fetchProductsFromKintone();
-        
-        if (workerProducts.length > 0) {
-            console.log(`${workerProducts.length}件の商品を取得しました`);
-            return workerProducts;
-        } else {
-            console.warn('Workersからのデータ取得に失敗したため、固定データを使用します');
-            return getFallbackProducts();
-        }
-    } else {
-        return getFallbackProducts();
-    }
-}
-
-/**
- * フォールバック用の固定商品データ
- * @returns {Array} 固定の商品データ配列
- */
-function getFallbackProducts() {
-    // script.jsの元のproductsデータをフォールバックとして使用
-    return [
-        {
-            id: 1,
-            name: '一般葬プラン',
-            description: '通夜・告別式を含む伝統的な葬儀',
-            price: 580000,
-            category: 'plan',
-            emoji: '🏛️'
-        },
-        {
-            id: 2,
-            name: '家族葬プラン',
-            description: 'ご家族・親族中心の小規模葬儀',
-            price: 420000,
-            category: 'plan',
-            emoji: '🏠'
-        },
-        {
-            id: 3,
-            name: '一日葬プラン',
-            description: '通夜を行わず告別式のみ',
-            price: 350000,
-            category: 'plan',
-            emoji: '⛪'
-        }
-        // 必要に応じて他の商品も追加
-    ];
-}
-
-/**
- * 見積データをkintoneから取得（Workers経由）
+ * 見積データをkintoneに保存
  * @param {string} conductId 施工ID
- * @returns {Promise<Array>} 見積アイテムの配列
- */
-async function getQuoteFromKintone(conductId) {
-    try {
-        const response = await fetch(`${WORKER_CONFIG.getQuoteUrl}?conductId=${conductId}`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || `取得エラー: ${response.status}`);
-        }
-
-        const result = await response.json();
-        console.log('見積データを取得しました:', result);
-        return result.quote_items || [];
-
-    } catch (error) {
-        console.error('見積の取得に失敗しました:', error);
-        return []; // エラー時は空配列を返す
-    }
-}
-
-/**
- * 見積データをkintoneに保存（Workers経由）
- * @param {string} conductId 施工ID
- * @param {Array} cartItems カート内の商品配列
+ * @param {string} patternId 商品パターンID
+ * @param {string} patternName 商品パターン名
+ * @param {Array} items 商品配列
  * @returns {Promise<Object>} 保存結果
  */
-async function saveQuoteToKintone(conductId, cartItems) {
+async function saveQuoteToKintone(conductId, patternId, patternName, items) {
     try {
-        // カテゴリ名をkintoneの形式に変換（逆マッピング）
-        const REVERSE_CATEGORY_MAPPING = {
-            'plan': 'プラン',
-            'casket_only': '棺',
-            'altar': '祭壇',
-            'flower': '供花・供物',
-            'service': 'お食事',
-            'other': 'その他'
-        };
-
-        // 見積データを作成
-        const items = cartItems.map(item => ({
-            productId: item.productId || '',
-            searchWord: item.searchWord || `${item.productId} ${item.name}`, // 検索ワードを使用
-            category: REVERSE_CATEGORY_MAPPING[item.category] || item.category,
-            name: item.name,
-            price: item.price,
-            quantity: item.quantity
-        }));
-
         const response = await fetch(WORKER_CONFIG.saveQuoteUrl, {
             method: 'POST',
             headers: {
@@ -245,6 +124,8 @@ async function saveQuoteToKintone(conductId, cartItems) {
             },
             body: JSON.stringify({
                 conductId: conductId,
+                patternId: patternId,
+                patternName: patternName,
                 items: items
             })
         });
@@ -267,9 +148,9 @@ async function saveQuoteToKintone(conductId, cartItems) {
 // エクスポート
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
-        fetchProductsFromKintone,
-        initializeProducts,
-        getQuoteFromKintone,
+        fetchPatternMaster,
+        fetchPatternDetail,
+        fetchProductMaster,
         saveQuoteToKintone
     };
 }
