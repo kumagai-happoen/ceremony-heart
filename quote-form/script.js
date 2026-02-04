@@ -96,12 +96,12 @@ function renderStep1() {
     }
     
     grid.innerHTML = patterns.map(pattern => `
-        <div class="pattern-card" data-pattern-id="${pattern.pattern_id}">
+        <div class="pattern-card" data-pattern-id="${pattern.product_pattern_id}">
             <div class="pattern-card-body">
-                <h3 class="pattern-name">${pattern.pattern_name}</h3>
+                <h3 class="pattern-name">${pattern.product_pattern_name}</h3>
                 <div class="pattern-amount">¥${parseInt(pattern.total_amount || 0).toLocaleString()}</div>
             </div>
-            <button class="btn-select-pattern" data-pattern-id="${pattern.pattern_id}">
+            <button class="btn-select-pattern" data-pattern-id="${pattern.product_pattern_id}">
                 選択
             </button>
         </div>
@@ -127,15 +127,17 @@ function renderStep1() {
 
 // 商品パターンを選択
 async function selectPattern(patternId) {
+    console.log('選択された商品パターンID:', patternId); // デバッグログ
     showLoading();
     
     try {
         // 商品パターン詳細を取得
         const detail = await fetchPatternDetail(patternId);
+        console.log('取得した商品パターン詳細:', detail); // デバッグログ
         
         selectedPattern = {
-            patternId: detail.pattern_id,
-            patternName: detail.pattern_name,
+            patternId: detail.product_pattern_id,
+            patternName: detail.product_pattern_name,
             totalAmount: detail.total_amount
         };
         
