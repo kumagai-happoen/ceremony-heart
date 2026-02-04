@@ -184,22 +184,6 @@ body {
     text-align: center;
 }
 
-.btn-select-pattern {
-    width: 100%;
-    background: var(--primary);
-    color: white;
-    border: none;
-    padding: 0.75rem;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s;
-}
-
-.btn-select-pattern:hover {
-    background: var(--primary-dark);
-}
-
 /* ========================================
    ステップ2: 商品編集
 ======================================== */

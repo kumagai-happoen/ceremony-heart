@@ -147,20 +147,8 @@ function renderStep1() {
             <div class="pattern-card-body">
                 <h3 class="pattern-name">${pattern.product_pattern_name}</h3>
             </div>
-            <button class="btn-select-pattern" data-pattern-id="${pattern.product_pattern_id}">
-                選択
-            </button>
         </div>
     `).join('');
-    
-    // パターン選択ボタンのイベント
-    document.querySelectorAll('.btn-select-pattern').forEach(btn => {
-        btn.addEventListener('click', async (e) => {
-            e.stopPropagation();
-            const patternId = btn.dataset.patternId;
-            await selectPattern(patternId);
-        });
-    });
     
     // カード全体のクリックイベント
     document.querySelectorAll('.pattern-card').forEach(card => {
