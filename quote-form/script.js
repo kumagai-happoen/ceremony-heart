@@ -153,6 +153,8 @@ function renderStep1() {
             </div>
         </div>
         <div class="step-container">
+            <div class="page-title-spacer"></div>
+            
             <div class="filter-section">
                 <label for="patternTypeFilter" class="filter-label">種別:</label>
                 <select id="patternTypeFilter" class="filter-select">
