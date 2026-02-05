@@ -32,11 +32,11 @@ body {
 }
 
 /* ========================================
-   故人名表示（右上）
+   故人名表示（右上・固定）
 ======================================== */
 .deceased-name,
 .deceased-name-header {
-    position: fixed;
+    position: absolute;
     top: 1.5rem;
     right: 2rem;
     font-size: 1.2rem;

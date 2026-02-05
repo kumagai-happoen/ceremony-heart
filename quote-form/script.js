@@ -255,7 +255,6 @@ function renderStep2() {
     
     const container = document.getElementById('app');
     container.innerHTML = `
-        <div class="deceased-name-header">${deceasedName} 様</div>
         <div class="step-container">
             <div class="step-header-bar">
                 <h1 class="page-title">${selectedPattern.patternName}</h1>
@@ -428,7 +427,6 @@ function renderStep3() {
     
     const container = document.getElementById('app');
     container.innerHTML = `
-        <div class="deceased-name-header">${deceasedName} 様</div>
         <div class="step-container">
             <h1 class="page-title">見積内容の確認</h1>
             
