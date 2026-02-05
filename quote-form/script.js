@@ -172,7 +172,12 @@ function filterPatterns(patternType) {
         return;
     }
     
-    const filteredPatterns = patterns.filter(p => p.product_pattern_type === patternType);
+    const filteredPatterns = patterns
+        .filter(p => p.product_pattern_type === patternType)
+        .sort((a, b) => {
+            // 商品パターンIDで昇順ソート
+            return a.product_pattern_id.localeCompare(b.product_pattern_id);
+        });
     
     if (filteredPatterns.length === 0) {
         grid.innerHTML = '<div class="empty-message">該当する商品パターンがありません</div>';
