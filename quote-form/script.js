@@ -148,9 +148,7 @@ function renderStep1() {
                 </select>
             </div>
             
-            <div class="pattern-grid" id="patternGrid">
-                <div class="empty-message">商品パターン種別を選択してください</div>
-            </div>
+            <div class="pattern-grid" id="patternGrid"></div>
         </div>
     `;
     
@@ -166,7 +164,7 @@ function filterPatterns(patternType) {
     const grid = document.getElementById('patternGrid');
     
     if (!patternType) {
-        grid.innerHTML = '<div class="empty-message">商品パターン種別を選択してください</div>';
+        grid.innerHTML = '';
         return;
     }
     
