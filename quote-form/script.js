@@ -141,7 +141,7 @@ function renderStep1() {
             <h2 class="page-title">プランを選択してください</h2>
             
             <div class="filter-section">
-                <label for="patternTypeFilter" class="filter-label">商品パターン種別:</label>
+                <label for="patternTypeFilter" class="filter-label">種別:</label>
                 <select id="patternTypeFilter" class="filter-select">
                     <option value="">-- 種別を選択してください --</option>
                     ${patternTypesOrder.map(type => `<option value="${type}">${type}</option>`).join('')}
@@ -255,10 +255,10 @@ function renderStep2() {
     
     const container = document.getElementById('app');
     container.innerHTML = `
+        <div class="deceased-name">${deceasedName} 様</div>
         <div class="step-container">
             <div class="step-header-bar">
                 <h1 class="page-title">${selectedPattern.patternName}</h1>
-                <button class="btn-back" onclick="renderStep1()">← パターン選択に戻る</button>
             </div>
             
             <div class="cart-section">
@@ -272,6 +272,10 @@ function renderStep2() {
                     <span>合計金額</span>
                     <span class="summary-total">¥<span id="totalAmount">0</span></span>
                 </div>
+            </div>
+            
+            <div class="confirm-actions">
+                <button class="btn-secondary" onclick="renderStep1()">← 戻る</button>
                 <button class="btn-primary" onclick="renderStep3()">確認画面へ</button>
             </div>
         </div>
@@ -427,6 +431,7 @@ function renderStep3() {
     
     const container = document.getElementById('app');
     container.innerHTML = `
+        <div class="deceased-name">${deceasedName} 様</div>
         <div class="step-container">
             <h1 class="page-title">見積内容の確認</h1>
             
