@@ -282,13 +282,20 @@ body {
 .cart-item-details {
     font-size: 0.9rem;
     color: var(--text-secondary);
-    margin-bottom: 0.3rem;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
 }
 
-.cart-item-price {
-    font-size: 1.1rem;
-    font-weight: 700;
+.detail-category {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.detail-price {
+    font-weight: 600;
     color: var(--primary);
+    font-size: 1rem;
 }
 
 .cart-item-controls {
@@ -508,26 +515,48 @@ body {
     color: var(--primary);
 }
 
-.confirm-list {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
+/* 見積表 */
+.quote-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
 }
 
-.confirm-item {
+.quote-table thead {
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    color: white;
+}
+
+.quote-table th {
     padding: 1rem;
-    background: var(--background);
-    border-radius: 6px;
-}
-
-.confirm-item-name {
+    text-align: left;
     font-weight: 600;
-    margin-bottom: 0.3rem;
+    font-size: 0.95rem;
+    border: 1px solid var(--primary-light);
 }
 
-.confirm-item-details {
-    font-size: 0.9rem;
-    color: var(--text-secondary);
+.quote-table tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background-color 0.2s;
+}
+
+.quote-table tbody tr:hover {
+    background-color: #FAF9F7;
+}
+
+.quote-table td {
+    padding: 1rem;
+    font-size: 0.95rem;
+    border: 1px solid var(--border);
+}
+
+.quote-table .text-center {
+    text-align: center;
+}
+
+.quote-table .text-right {
+    text-align: right;
+    font-weight: 600;
 }
 
 .confirm-total {

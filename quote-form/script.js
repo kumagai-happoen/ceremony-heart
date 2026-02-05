@@ -267,11 +267,9 @@ function renderStep2() {
                 <button class="btn-add-product" onclick="showProductModal()">+ 商品を追加</button>
             </div>
             
-            <div class="summary-section">
-                <div class="summary-row">
-                    <span>合計金額</span>
-                    <span class="summary-total">¥<span id="totalAmount">0</span></span>
-                </div>
+            <div class="confirm-total">
+                <span>合計金額</span>
+                <span class="total-amount">¥<span id="totalAmount">0</span></span>
             </div>
             
             <div class="confirm-actions">
@@ -311,9 +309,9 @@ function updateCartDisplay() {
                 <div class="cart-item-info">
                     <div class="cart-item-name">${item.productName}</div>
                     <div class="cart-item-details">
-                        ${item.productCategory} / ${item.productAttribute} / 税率${item.taxRate}%
+                        <span class="detail-category">${item.productCategory}</span>
+                        <span class="detail-price">¥${item.price.toLocaleString()}</span>
                     </div>
-                    <div class="cart-item-price">¥${item.price.toLocaleString()}</div>
                 </div>
                 <div class="cart-item-controls">
                     <button class="qty-btn" onclick="updateQuantity(${item.id}, -1)">−</button>
@@ -442,18 +440,30 @@ function renderStep3() {
             
             <div class="confirm-section">
                 <h2 class="section-title">商品一覧（${cart.length}件）</h2>
-                <div class="confirm-list">
-                    ${cart.map(item => `
-                        <div class="confirm-item">
-                            <div class="confirm-item-name">${item.productName}</div>
-                            <div class="confirm-item-details">
-                                ${item.productCategory} / ${item.productAttribute} / 
-                                ¥${item.price.toLocaleString()} × ${item.quantity} = 
-                                ¥${(item.price * item.quantity).toLocaleString()}
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
+                <table class="quote-table">
+                    <thead>
+                        <tr>
+                            <th>商品区分</th>
+                            <th>商品名</th>
+                            <th>数量</th>
+                            <th>単価</th>
+                            <th>金額</th>
+                            <th>計</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${cart.map(item => `
+                            <tr>
+                                <td>${item.productCategory}</td>
+                                <td>${item.productName}</td>
+                                <td class="text-center">${item.quantity}</td>
+                                <td class="text-right">¥${item.price.toLocaleString()}</td>
+                                <td class="text-center">×</td>
+                                <td class="text-right">¥${(item.price * item.quantity).toLocaleString()}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
             </div>
             
             <div class="confirm-total">
