@@ -119,6 +119,9 @@ function hideLoading() {
 function renderStep1() {
     currentStep = 1;
     
+    // 商品パターン種別の一覧を取得（重複なし）
+    const patternTypes = [...new Set(patterns.map(p => p.product_pattern_type).filter(t => t))];
+    
     const container = document.getElementById('app');
     container.innerHTML = `
         <div class="page-header">
@@ -126,18 +129,45 @@ function renderStep1() {
         </div>
         <div class="step-container">
             <h2 class="page-title">プランを選択してください</h2>
-            <div class="pattern-grid" id="patternGrid"></div>
+            
+            <div class="filter-section">
+                <label for="patternTypeFilter" class="filter-label">商品パターン種別:</label>
+                <select id="patternTypeFilter" class="filter-select">
+                    <option value="">-- 種別を選択してください --</option>
+                    ${patternTypes.map(type => `<option value="${type}">${type}</option>`).join('')}
+                </select>
+            </div>
+            
+            <div class="pattern-grid" id="patternGrid">
+                <div class="empty-message">商品パターン種別を選択してください</div>
+            </div>
         </div>
     `;
     
+    // フィルタのイベントリスナー
+    const filterSelect = document.getElementById('patternTypeFilter');
+    filterSelect.addEventListener('change', (e) => {
+        filterPatterns(e.target.value);
+    });
+}
+
+// 商品パターンをフィルタリングして表示
+function filterPatterns(patternType) {
     const grid = document.getElementById('patternGrid');
     
-    if (patterns.length === 0) {
-        grid.innerHTML = '<div class="empty-message">商品パターンが見つかりません</div>';
+    if (!patternType) {
+        grid.innerHTML = '<div class="empty-message">商品パターン種別を選択してください</div>';
         return;
     }
     
-    grid.innerHTML = patterns.map(pattern => `
+    const filteredPatterns = patterns.filter(p => p.product_pattern_type === patternType);
+    
+    if (filteredPatterns.length === 0) {
+        grid.innerHTML = '<div class="empty-message">該当する商品パターンがありません</div>';
+        return;
+    }
+    
+    grid.innerHTML = filteredPatterns.map(pattern => `
         <div class="pattern-card" data-pattern-id="${pattern.product_pattern_id}">
             <div class="pattern-image">
                 ${pattern.imageUrl 
