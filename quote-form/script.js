@@ -153,8 +153,6 @@ function renderStep1() {
             </div>
         </div>
         <div class="step-container">
-            <h2 class="page-title">プランを選択してください</h2>
-            
             <div class="filter-section">
                 <label for="patternTypeFilter" class="filter-label">種別:</label>
                 <select id="patternTypeFilter" class="filter-select">
