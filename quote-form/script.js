@@ -1,6 +1,7 @@
 // グローバル変数
 let conductId = ''; // 施工ID
 let deceasedName = ''; // 故人名前
+let mournerName = ''; // 喪主名前
 let patterns = []; // 商品パターン一覧
 let productMaster = []; // 商品マスタ
 let currentStep = 1; // 現在のステップ (1: パターン選択, 2: 商品編集, 3: 最終確認)
@@ -25,7 +26,9 @@ async function init() {
         if (typeof fetchConductInfo === 'function') {
             conductInfo = await fetchConductInfo(conductId);
             deceasedName = conductInfo.deceased_name || '';
+            mournerName = conductInfo.mourner_name || '';
             console.log('故人名を取得:', deceasedName);
+            console.log('喪主名を取得:', mournerName);
             
             // 既存の見積データがあれば復元
             if (conductInfo.quote_items && conductInfo.quote_items.length > 0) {
@@ -136,7 +139,10 @@ function renderStep1() {
     
     const container = document.getElementById('app');
     container.innerHTML = `
-        <div class="deceased-name">${deceasedName} 様</div>
+        <div class="deceased-name">
+            <div>${deceasedName} 様</div>
+            <div class="mourner-info">喪主: ${mournerName} 様</div>
+        </div>
         <div class="step-container">
             <h2 class="page-title">プランを選択してください</h2>
             
@@ -253,7 +259,10 @@ function renderStep2() {
     
     const container = document.getElementById('app');
     container.innerHTML = `
-        <div class="deceased-name">${deceasedName} 様</div>
+        <div class="deceased-name">
+            <div>${deceasedName} 様</div>
+            <div class="mourner-info">喪主: ${mournerName} 様</div>
+        </div>
         <div class="step-container">
             <div class="step-header-bar">
                 <h1 class="page-title">${selectedPattern.patternName}</h1>
@@ -427,13 +436,12 @@ function renderStep3() {
     
     const container = document.getElementById('app');
     container.innerHTML = `
-        <div class="deceased-name">${deceasedName} 様</div>
+        <div class="deceased-name">
+            <div>${deceasedName} 様</div>
+            <div class="mourner-info">喪主: ${mournerName} 様</div>
+        </div>
         <div class="step-container">
             <h1 class="page-title">お見積り内容</h1>
-            
-            <div class="confirm-section">
-                <div class="confirm-pattern-large">${selectedPattern.patternName}</div>
-            </div>
             
             <div class="confirm-section">
                 <h2 class="section-title">お見積り明細</h2>

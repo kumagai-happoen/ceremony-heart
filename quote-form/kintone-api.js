@@ -39,6 +39,7 @@ async function fetchConductInfo(conductId) {
         console.error('施工情報の取得に失敗:', error);
         return { 
             deceased_name: '',
+            mourner_name: '',
             product_pattern_id: '',
             product_pattern_name: '',
             quote_items: []
