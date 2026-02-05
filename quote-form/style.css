@@ -28,27 +28,34 @@ body {
     max-width: 1400px;
     margin: 0 auto;
     padding: 0;
+    position: relative;
 }
 
 /* ========================================
-   ヘッダー
+   故人名表示（右上）
 ======================================== */
-.page-header {
-    background: var(--primary);
-    color: white;
-    padding: 2rem;
-    margin-bottom: 2rem;
+.deceased-name,
+.deceased-name-header {
+    position: fixed;
+    top: 1.5rem;
+    right: 2rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    background: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    z-index: 100;
 }
 
-.header-title {
-    font-size: 2rem;
-    font-weight: 700;
-    margin: 0;
-    text-align: center;
-}
+/* ========================================
+   ヘッダー（削除）
+======================================== */
+/* .page-header は削除済み */
 
 .step-container {
-    padding: 0 2rem 2rem;
+    padding: 2rem;
 }
 
 /* ========================================
