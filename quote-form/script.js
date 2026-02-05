@@ -260,7 +260,7 @@ function renderStep2() {
             </div>
             
             <div class="cart-section">
-                <h2 class="section-title">商品一覧</h2>
+                <h2 class="section-title">プラン内容</h2>
                 <div class="cart-list" id="cartList"></div>
                 <button class="btn-add-product" onclick="showProductModal()">+ 商品を追加</button>
             </div>
@@ -429,15 +429,14 @@ function renderStep3() {
     container.innerHTML = `
         <div class="deceased-name">${deceasedName} 様</div>
         <div class="step-container">
-            <h1 class="page-title">見積内容の確認</h1>
+            <h1 class="page-title">お見積り内容</h1>
             
             <div class="confirm-section">
-                <h2 class="section-title">商品パターン</h2>
-                <div class="confirm-pattern">${selectedPattern.patternName}</div>
+                <div class="confirm-pattern-large">${selectedPattern.patternName}</div>
             </div>
             
             <div class="confirm-section">
-                <h2 class="section-title">商品一覧（${cart.length}件）</h2>
+                <h2 class="section-title">お見積り明細</h2>
                 <table class="quote-table">
                     <thead>
                         <tr>
@@ -445,7 +444,6 @@ function renderStep3() {
                             <th>商品名</th>
                             <th>数量</th>
                             <th>単価</th>
-                            <th>金額</th>
                             <th>計</th>
                         </tr>
                     </thead>
@@ -456,8 +454,7 @@ function renderStep3() {
                                 <td>${item.productName}</td>
                                 <td class="text-center">${item.quantity}</td>
                                 <td class="text-right">¥${item.price.toLocaleString()}</td>
-                                <td class="text-center">×</td>
-                                <td class="text-right">¥${(item.price * item.quantity).toLocaleString()}</td>
+                                <td class="text-right total-cell">¥${(item.price * item.quantity).toLocaleString()}</td>
                             </tr>
                         `).join('')}
                     </tbody>

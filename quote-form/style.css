@@ -263,7 +263,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1.5rem;
+    padding: 1rem 1.5rem;
     background: var(--background);
     border-radius: 6px;
     border: 1px solid var(--border);
@@ -515,11 +515,23 @@ body {
     color: var(--primary);
 }
 
+.confirm-pattern-large {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--primary);
+    text-align: center;
+    padding: 1rem 0;
+}
+
 /* 見積表 */
 .quote-table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
     margin-top: 1rem;
+    border: 2px solid var(--primary-light);
+    border-radius: 8px;
+    overflow: hidden;
 }
 
 .quote-table thead {
@@ -528,26 +540,41 @@ body {
 }
 
 .quote-table th {
-    padding: 1rem;
+    padding: 1.2rem 1rem;
     text-align: left;
     font-weight: 600;
-    font-size: 0.95rem;
-    border: 1px solid var(--primary-light);
+    font-size: 1rem;
+    border-bottom: 2px solid var(--primary);
+}
+
+.quote-table th:not(:last-child) {
+    border-right: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .quote-table tbody tr {
-    border-bottom: 1px solid var(--border);
     transition: background-color 0.2s;
 }
 
-.quote-table tbody tr:hover {
+.quote-table tbody tr:nth-child(even) {
     background-color: #FAF9F7;
+}
+
+.quote-table tbody tr:hover {
+    background-color: #F0EDE9;
 }
 
 .quote-table td {
     padding: 1rem;
-    font-size: 0.95rem;
-    border: 1px solid var(--border);
+    font-size: 1rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.quote-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.quote-table td:not(:last-child) {
+    border-right: 1px solid var(--border);
 }
 
 .quote-table .text-center {
@@ -557,6 +584,13 @@ body {
 .quote-table .text-right {
     text-align: right;
     font-weight: 600;
+}
+
+.quote-table .total-cell {
+    background: linear-gradient(135deg, #F9F7F5, #FFFFFF);
+    font-weight: 700;
+    color: var(--primary);
+    font-size: 1.1rem;
 }
 
 .confirm-total {
