@@ -21,8 +21,9 @@ async function init() {
     
     try {
         // 施工情報と見積データを取得
+        let conductInfo = null;
         if (typeof fetchConductInfo === 'function') {
-            const conductInfo = await fetchConductInfo(conductId);
+            conductInfo = await fetchConductInfo(conductId);
             deceasedName = conductInfo.deceased_name || '';
             console.log('故人名を取得:', deceasedName);
             
@@ -53,8 +54,8 @@ async function init() {
             console.log('商品マスタを読み込みました:', productMaster.length, '件');
         }
         
-        // 既存の見積データがある場合は商品編集画面へ、なければパターン選択画面へ
-        if (selectedPattern && conductInfo.quote_items && conductInfo.quote_items.length > 0) {
+        // 既存の見積データがある場合は最終確認画面へ、なければパターン選択画面へ
+        if (selectedPattern && conductInfo && conductInfo.quote_items && conductInfo.quote_items.length > 0) {
             // カートに商品を復元
             cart = conductInfo.quote_items.map((item, index) => ({
                 id: index + 1,
@@ -67,7 +68,7 @@ async function init() {
                 taxRate: item.tax_rate || '10'
             }));
             
-            renderStep2(); // 商品編集画面へ
+            renderStep3(); // 最終確認画面へ
         } else {
             renderStep1(); // パターン選択画面へ
         }
