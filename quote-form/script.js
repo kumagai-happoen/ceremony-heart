@@ -119,8 +119,20 @@ function hideLoading() {
 function renderStep1() {
     currentStep = 1;
     
-    // 商品パターン種別の一覧を取得（重複なし）
-    const patternTypes = [...new Set(patterns.map(p => p.product_pattern_type).filter(t => t))];
+    // 商品パターン種別の順番を固定
+    const patternTypesOrder = [
+        '一般葬',
+        '家族葬',
+        '火葬式',
+        'INORIE',
+        'ﾌﾟﾚﾐｱﾑ',
+        '互助会',
+        'みんなのお葬式',
+        'ｲｵﾝ',
+        'お寺',
+        '葬祭扶助',
+        '区民葬儀'
+    ];
     
     const container = document.getElementById('app');
     container.innerHTML = `
@@ -134,7 +146,7 @@ function renderStep1() {
                 <label for="patternTypeFilter" class="filter-label">商品パターン種別:</label>
                 <select id="patternTypeFilter" class="filter-select">
                     <option value="">-- 種別を選択してください --</option>
-                    ${patternTypes.map(type => `<option value="${type}">${type}</option>`).join('')}
+                    ${patternTypesOrder.map(type => `<option value="${type}">${type}</option>`).join('')}
                 </select>
             </div>
             
