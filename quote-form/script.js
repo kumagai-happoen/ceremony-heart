@@ -122,6 +122,9 @@ function hideLoading() {
 function renderStep1() {
     currentStep = 1;
     
+    // ページTOPへスクロール
+    window.scrollTo(0, 0);
+    
     // 商品パターン種別の順番を固定
     const patternTypesOrder = [
         '一般葬',
@@ -139,9 +142,15 @@ function renderStep1() {
     
     const container = document.getElementById('app');
     container.innerHTML = `
-        <div class="deceased-name">
-            <div>${deceasedName} 様</div>
-            <div class="mourner-info">喪主: ${mournerName} 様</div>
+        <div class="name-header-container">
+            <div class="name-box">
+                <div class="name-label">喪主</div>
+                <div class="name-value">${mournerName} 様</div>
+            </div>
+            <div class="name-box">
+                <div class="name-label">故人</div>
+                <div class="name-value">${deceasedName} 様</div>
+            </div>
         </div>
         <div class="step-container">
             <h2 class="page-title">プランを選択してください</h2>
@@ -257,11 +266,20 @@ document.addEventListener('DOMContentLoaded', init);
 function renderStep2() {
     currentStep = 2;
     
+    // ページTOPへスクロール
+    window.scrollTo(0, 0);
+    
     const container = document.getElementById('app');
     container.innerHTML = `
-        <div class="deceased-name">
-            <div>${deceasedName} 様</div>
-            <div class="mourner-info">喪主: ${mournerName} 様</div>
+        <div class="name-header-container">
+            <div class="name-box">
+                <div class="name-label">喪主</div>
+                <div class="name-value">${mournerName} 様</div>
+            </div>
+            <div class="name-box">
+                <div class="name-label">故人</div>
+                <div class="name-value">${deceasedName} 様</div>
+            </div>
         </div>
         <div class="step-container">
             <div class="step-header-bar">
@@ -271,7 +289,7 @@ function renderStep2() {
             <div class="cart-section">
                 <h2 class="section-title">プラン内容</h2>
                 <div class="cart-list" id="cartList"></div>
-                <button class="btn-add-product" onclick="showProductModal()">+ 商品を追加</button>
+                <button class="btn-add-product" onclick="showProductModal()">+ 見積に追加</button>
             </div>
             
             <div class="confirm-total">
@@ -289,7 +307,7 @@ function renderStep2() {
         <div id="productModal" class="modal" style="display: none;">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h2>商品を追加</h2>
+                    <h2>見積に追加</h2>
                     <button class="modal-close" onclick="closeProductModal()">×</button>
                 </div>
                 <div class="modal-body">
@@ -361,10 +379,13 @@ function showProductModal() {
     const modal = document.getElementById('productModal');
     modal.style.display = 'flex';
     
+    // 検索条件をクリア
+    const searchInput = document.getElementById('productSearch');
+    searchInput.value = '';
+    
     renderProductList();
     
     // 検索イベント
-    const searchInput = document.getElementById('productSearch');
     searchInput.addEventListener('input', (e) => {
         renderProductList(e.target.value);
     });
@@ -432,13 +453,22 @@ function addProductToCart(productId) {
 function renderStep3() {
     currentStep = 3;
     
+    // ページTOPへスクロール
+    window.scrollTo(0, 0);
+    
     const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     
     const container = document.getElementById('app');
     container.innerHTML = `
-        <div class="deceased-name">
-            <div>${deceasedName} 様</div>
-            <div class="mourner-info">喪主: ${mournerName} 様</div>
+        <div class="name-header-container">
+            <div class="name-box">
+                <div class="name-label">喪主</div>
+                <div class="name-value">${mournerName} 様</div>
+            </div>
+            <div class="name-box">
+                <div class="name-label">故人</div>
+                <div class="name-value">${deceasedName} 様</div>
+            </div>
         </div>
         <div class="step-container">
             <h1 class="page-title">お見積り内容</h1>
