@@ -4,7 +4,7 @@
  */
 
 // Cloudflare Worker設定（統合Worker）
-const WORKER_BASE_URL = 'https://quote-worker.kkumagai.workers.dev/';
+const WORKER_BASE_URL = 'https://quote-worker.kkumagai.workers.dev';
 
 /**
  * 施工情報と見積データを取得
