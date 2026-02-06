@@ -100,8 +100,10 @@ function hideLoading() {
 function renderUI() {
     const app = document.getElementById('app');
     app.innerHTML = `
-        ${renderHeader()}
-        ${renderQuoteTabs()}
+        <div class="app-header">
+            ${renderHeader()}
+            ${renderQuoteTabs()}
+        </div>
         <div class="quote-content">
             ${renderCategoryTabs()}
             ${renderCategoryContent()}
@@ -273,6 +275,7 @@ function renderPlanSection(quote) {
 
 // 商品パターン選択モーダル描画
 function renderPatternModal() {
+    // kintoneから取得した種別を使用（番号付きでソート）
     const patternTypes = [...new Set(patterns.map(p => p.product_pattern_type))].sort();
     
     return `
