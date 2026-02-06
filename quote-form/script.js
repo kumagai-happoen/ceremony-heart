@@ -239,7 +239,12 @@ function renderCategoryContent() {
                                 </div>
                                 <div class="product-controls">
                                     <button class="qty-btn" onclick="updateQuantity(${index}, -1)">−</button>
-                                    <span class="qty-display">${item.quantity}</span>
+                                    <input type="number" 
+                                           class="qty-input" 
+                                           value="${item.quantity}" 
+                                           min="1" 
+                                           onchange="updateQuantityDirect(${index}, this.value)"
+                                           onclick="this.select()">
                                     <button class="qty-btn" onclick="updateQuantity(${index}, 1)">+</button>
                                     <button class="btn-remove" onclick="removeProduct(${index})">削除</button>
                                 </div>
@@ -647,6 +652,59 @@ async function updateQuantity(itemIndex, delta) {
         
         let newQty = parseInt(item.quantity) + delta;
         if (newQty < 1) newQty = 1;
+        
+        item.quantity = newQty.toString();
+        
+        // 見積を更新
+        await updateQuote(
+            quote.quote_id,
+            quote.product_pattern_id,
+            quote.product_pattern_name,
+            currentCategory === 'plan' ? items : quote.plan_items || [],
+            currentCategory === 'food' ? items : quote.food_items || [],
+            currentCategory === 'gift' ? items : quote.gift_items || []
+        );
+        
+        // 見積一覧を再取得
+        quotes = await fetchQuotes(conductId);
+        
+        renderUI();
+        
+    } catch (error) {
+        console.error('数量変更エラー:', error);
+        alert('数量の変更に失敗しました');
+    } finally {
+        hideLoading();
+    }
+}
+
+async function updateQuantityDirect(itemIndex, newValue) {
+    const newQty = parseInt(newValue);
+    
+    // 入力値の検証
+    if (isNaN(newQty) || newQty < 1) {
+        alert('数量は1以上の整数を入力してください');
+        renderUI(); // 元の値に戻す
+        return;
+    }
+    
+    showLoading();
+    
+    try {
+        const quote = quotes[currentQuoteIndex];
+        
+        // 現在のカテゴリの商品リストを取得
+        let items = [];
+        if (currentCategory === 'plan') {
+            items = [...(quote.plan_items || [])];
+        } else if (currentCategory === 'food') {
+            items = [...(quote.food_items || [])];
+        } else if (currentCategory === 'gift') {
+            items = [...(quote.gift_items || [])];
+        }
+        
+        const item = items[itemIndex];
+        if (!item) return;
         
         item.quantity = newQty.toString();
         

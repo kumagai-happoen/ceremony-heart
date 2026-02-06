@@ -389,6 +389,36 @@ body {
     color: white;
 }
 
+.qty-input {
+    width: 60px;
+    height: 36px;
+    text-align: center;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: white;
+    padding: 0;
+}
+
+.qty-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(91, 75, 138, 0.1);
+}
+
+/* Chromeなどのスピンボタンを非表示 */
+.qty-input::-webkit-outer-spin-button,
+.qty-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Firefoxのスピンボタンを非表示 */
+.qty-input[type=number] {
+    -moz-appearance: textfield;
+}
+
 .qty-display {
     font-size: 1.1rem;
     font-weight: 600;
