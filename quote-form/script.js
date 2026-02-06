@@ -177,13 +177,20 @@ function renderCategoryTabs() {
                     <div class="grand-total-label">総合計</div>
                     <div class="grand-total-amount">¥${grandTotal.toLocaleString()}</div>
                 </div>
-                <button class="btn-finalize-quote" onclick="finalizeQuoteConfirm()">
-                    見積確定
-                </button>
+                ${!quote.is_finalized ? `
+                    <button class="btn-finalize-quote" onclick="finalizeQuoteConfirm()">
+                        見積確定
+                    </button>
+                ` : `
+                    <div class="finalized-message">
+                        <span class="finalized-icon">✓</span>
+                        確定済み
+                    </div>
+                `}
                 <button class="btn-copy-quote" onclick="copyQuote()">
                     この見積をコピーして作成
                 </button>
-                ${quotes.length > 1 ? `
+                ${quotes.length > 1 && !quote.is_finalized ? `
                     <button class="btn-delete-quote" onclick="deleteQuoteConfirm()">
                         この見積を削除
                     </button>

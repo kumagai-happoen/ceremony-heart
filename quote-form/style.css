@@ -248,6 +248,36 @@ body {
     box-shadow: 0 6px 20px rgba(91, 138, 91, 0.4);
 }
 
+.finalized-message {
+    width: 100%;
+    background: linear-gradient(135deg, #FFF9C4, #FFE082);
+    border: 2px solid #F9A825;
+    padding: 1.5rem;
+    border-radius: 8px;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #F57F17;
+    text-align: center;
+    margin-bottom: 1rem;
+    box-shadow: 0 4px 16px rgba(249, 168, 37, 0.3);
+    letter-spacing: 0.05em;
+}
+
+.finalized-icon {
+    display: inline-block;
+    background: #F9A825;
+    color: white;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 28px;
+    font-size: 1rem;
+    margin-right: 0.5rem;
+    font-weight: 700;
+    vertical-align: middle;
+}
+
 .btn-copy-quote {
     width: 100%;
     background: linear-gradient(135deg, var(--primary), var(--primary-light));
