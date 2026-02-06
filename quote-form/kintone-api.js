@@ -309,6 +309,7 @@ async function fetchProductMaster(category = null) {
             productId: product.product_id || '',
             productName: product.product_name || '',
             productType: product.product_type || '', // 新規追加
+            unit: product.unit || '',
             price: parseInt(product.price_tax_included || '0'),
             taxRate: product.tax_rate || '10',
             imageUrl: product.image_files && product.image_files.length > 0 

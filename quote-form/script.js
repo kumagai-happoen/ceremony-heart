@@ -184,7 +184,7 @@ function renderCategoryTabs() {
                 ` : `
                     <div class="finalized-message">
                         <span class="finalized-icon">✓</span>
-                        確定済
+                        確定
                     </div>
                 `}
                 <button class="btn-copy-quote" onclick="copyQuote()">
@@ -523,6 +523,7 @@ async function selectPattern(patternId) {
             product_attribute: p.product_attribute || '',
             product_id: p.product_id || '',
             product_name: p.product_name || '',
+            unit: p.unit || '',
             price_tax_included: p.price_tax_included || '0',
             quantity: p.quantity || '1',
             tax_rate: p.tax_rate || '10'
@@ -634,6 +635,7 @@ async function addProduct(productId) {
                 product_attribute: product.productAttribute,
                 product_id: product.productId,
                 product_name: product.productName,
+                unit: product.unit,
                 price_tax_included: product.price.toString(),
                 quantity: '1',
                 tax_rate: product.taxRate
