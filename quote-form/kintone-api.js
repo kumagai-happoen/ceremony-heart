@@ -180,6 +180,40 @@ async function deleteQuote(quoteId) {
 }
 
 /**
+ * 見積を確定して施工管理アプリに保存
+ * @param {string} conductId 施工ID
+ * @param {string} quoteId 見積ID
+ * @returns {Promise<Object>} 確定結果
+ */
+async function finalizeQuote(conductId, quoteId) {
+    try {
+        const response = await fetch(`${WORKER_BASE_URL}/quotes/finalize`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                conductId: conductId,
+                quoteId: quoteId
+            })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || `確定エラー: ${response.status}`);
+        }
+
+        const result = await response.json();
+        console.log('見積を確定しました:', result);
+        return result;
+
+    } catch (error) {
+        console.error('見積の確定に失敗しました:', error);
+        throw error;
+    }
+}
+
+/**
  * 商品パターンマスタを取得
  * @returns {Promise<Array>} 商品パターンの配列
  */
@@ -296,6 +330,7 @@ if (typeof module !== 'undefined' && module.exports) {
         createQuote,
         updateQuote,
         deleteQuote,
+        finalizeQuote,
         fetchPatternMaster,
         fetchPatternDetail,
         fetchProductMaster

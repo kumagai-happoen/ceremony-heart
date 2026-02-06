@@ -176,6 +176,9 @@ function renderCategoryTabs() {
                     <div class="grand-total-label">総合計</div>
                     <div class="grand-total-amount">¥${grandTotal.toLocaleString()}</div>
                 </div>
+                <button class="btn-finalize-quote" onclick="finalizeQuoteConfirm()">
+                    見積確定
+                </button>
                 <button class="btn-copy-quote" onclick="copyQuote()">
                     この見積をコピーして作成
                 </button>
@@ -415,6 +418,26 @@ async function deleteQuoteConfirm() {
     } catch (error) {
         console.error('見積削除エラー:', error);
         alert('見積の削除に失敗しました');
+    } finally {
+        hideLoading();
+    }
+}
+
+async function finalizeQuoteConfirm() {
+    if (!confirm('この見積を確定して施工管理アプリに保存しますか？\n\n※施工管理アプリの見積データが上書きされます。')) {
+        return;
+    }
+    
+    showLoading();
+    try {
+        const quoteId = quotes[currentQuoteIndex].quote_id;
+        await finalizeQuote(conductId, quoteId);
+        
+        alert('見積を確定しました。\n施工管理アプリに保存されました。');
+        
+    } catch (error) {
+        console.error('見積確定エラー:', error);
+        alert('見積の確定に失敗しました: ' + error.message);
     } finally {
         hideLoading();
     }
