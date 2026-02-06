@@ -2,11 +2,18 @@
 let conductId = ''; // 施工ID
 let deceasedName = ''; // 故人名前
 let mournerName = ''; // 喪主名前
+let quotes = []; // 見積一覧
 let patterns = []; // 商品パターン一覧
 let productMaster = []; // 商品マスタ
-let currentStep = 1; // 現在のステップ (1: パターン選択, 2: 商品編集, 3: 最終確認)
-let selectedPattern = null; // 選択された商品パターン
-let cart = []; // カート（商品一覧）
+let currentQuoteIndex = 0; // 現在選択中の見積インデックス
+let currentCategory = 'plan'; // 現在選択中のカテゴリ ('plan', 'food', 'gift')
+
+// カテゴリ定義
+const CATEGORIES = {
+    plan: { name: 'プラン', type: 'プラン' },
+    food: { name: '料理', type: '料理' },
+    gift: { name: '返礼品', type: '返礼品' }
+};
 
 // 初期化
 async function init() {
@@ -16,65 +23,36 @@ async function init() {
     
     if (!conductId) {
         alert('施工IDが指定されていません。URLに?id=xxxを追加してください。');
+        return;
     }
     
     showLoading();
     
     try {
-        // 施工情報と見積データを取得
-        let conductInfo = null;
-        if (typeof fetchConductInfo === 'function') {
-            conductInfo = await fetchConductInfo(conductId);
-            deceasedName = conductInfo.deceased_name || '';
-            mournerName = conductInfo.mourner_name || '';
-            console.log('故人名を取得:', deceasedName);
-            console.log('喪主名を取得:', mournerName);
-            
-            // 既存の見積データがあれば復元
-            if (conductInfo.quote_items && conductInfo.quote_items.length > 0) {
-                console.log('既存の見積データを復元します:', conductInfo.quote_items.length, '件');
-                
-                // 選択された商品パターン情報を保存
-                if (conductInfo.product_pattern_id) {
-                    selectedPattern = {
-                        patternId: conductInfo.product_pattern_id,
-                        patternName: conductInfo.product_pattern_name,
-                        totalAmount: 0 // 後で計算
-                    };
-                }
-            }
-        }
+        // 施工情報を取得
+        const conductInfo = await fetchConductInfo(conductId);
+        deceasedName = conductInfo.deceased_name || '';
+        mournerName = conductInfo.mourner_name || '';
         
         // 商品パターンマスタを取得
-        if (typeof fetchPatternMaster === 'function') {
-            patterns = await fetchPatternMaster();
-            console.log('商品パターンマスタを読み込みました:', patterns.length, '件');
+        patterns = await fetchPatternMaster();
+        console.log('商品パターンマスタを読み込みました:', patterns.length, '件');
+        
+        // 商品マスタを取得（全カテゴリ）
+        productMaster = await fetchProductMaster();
+        console.log('商品マスタを読み込みました:', productMaster.length, '件');
+        
+        // 見積一覧を取得
+        quotes = await fetchQuotes(conductId);
+        console.log('見積を読み込みました:', quotes.length, '件');
+        
+        // 見積がない場合は1つ作成
+        if (quotes.length === 0) {
+            await createNewQuote();
         }
         
-        // 商品マスタを取得
-        if (typeof fetchProductMaster === 'function') {
-            productMaster = await fetchProductMaster();
-            console.log('商品マスタを読み込みました:', productMaster.length, '件');
-        }
-        
-        // 既存の見積データがある場合は最終確認画面へ、なければパターン選択画面へ
-        if (selectedPattern && conductInfo && conductInfo.quote_items && conductInfo.quote_items.length > 0) {
-            // カートに商品を復元
-            cart = conductInfo.quote_items.map((item, index) => ({
-                id: index + 1,
-                productCategory: item.product_category,
-                productAttribute: item.product_attribute,
-                productId: item.product_id,
-                productName: item.product_name,
-                price: parseInt(item.price_tax_included || 0),
-                quantity: parseInt(item.quantity || 1),
-                taxRate: item.tax_rate || '10'
-            }));
-            
-            renderStep3(); // 最終確認画面へ
-        } else {
-            renderStep1(); // パターン選択画面へ
-        }
+        // UIを初期化
+        renderUI();
         
     } catch (error) {
         console.error('初期化エラー:', error);
@@ -117,32 +95,26 @@ function hideLoading() {
 }
 
 // ========================================
-// ステップ1: 商品パターン選択
+// UI描画
 // ========================================
-function renderStep1() {
-    currentStep = 1;
-    
-    // ページTOPへスクロール
-    window.scrollTo(0, 0);
-    
-    // 商品パターン種別の順番を固定
-    const patternTypesOrder = [
-        '一般葬',
-        '家族葬',
-        '火葬式',
-        'INORIE',
-        'ﾌﾟﾚﾐｱﾑ',
-        '互助会',
-        'みんなのお葬式',
-        'ｲｵﾝ',
-        'お寺',
-        '葬祭扶助',
-        '区民葬儀'
-    ];
-    
-    const container = document.getElementById('app');
-    container.innerHTML = `
-        <div class="name-header-container">
+function renderUI() {
+    const app = document.getElementById('app');
+    app.innerHTML = `
+        ${renderHeader()}
+        ${renderQuoteTabs()}
+        <div class="quote-content">
+            ${renderCategoryTabs()}
+            ${renderCategoryContent()}
+        </div>
+        ${renderPatternModal()}
+        ${renderProductModal()}
+    `;
+}
+
+// ヘッダー描画
+function renderHeader() {
+    return `
+        <div class="name-header">
             <div class="name-box">
                 <div class="name-label">喪主</div>
                 <div class="name-value">${mournerName} 様</div>
@@ -152,29 +124,258 @@ function renderStep1() {
                 <div class="name-value">${deceasedName} 様</div>
             </div>
         </div>
-        <div class="step-container">
-            <div class="page-title-spacer"></div>
-            
-            <div class="filter-section">
-                <label for="patternTypeFilter" class="filter-label">種別:</label>
-                <select id="patternTypeFilter" class="filter-select">
-                    <option value="">-- 種別を選択してください --</option>
-                    ${patternTypesOrder.map(type => `<option value="${type}">${type}</option>`).join('')}
-                </select>
-            </div>
-            
-            <div class="pattern-grid" id="patternGrid"></div>
-        </div>
     `;
-    
-    // フィルタのイベントリスナー
-    const filterSelect = document.getElementById('patternTypeFilter');
-    filterSelect.addEventListener('change', (e) => {
-        filterPatterns(e.target.value);
-    });
 }
 
-// 商品パターンをフィルタリングして表示
+// 見積タブ描画
+function renderQuoteTabs() {
+    return `
+        <div class="quote-tabs-container">
+            ${quotes.map((quote, index) => `
+                <div class="quote-tab ${index === currentQuoteIndex ? 'active' : ''}" 
+                     onclick="switchQuote(${index})">
+                    見積 ${index + 1}
+                    ${quotes.length > 1 ? `
+                        <button class="quote-tab-close" 
+                                onclick="event.stopPropagation(); deleteQuoteConfirm(${index})">
+                            ×
+                        </button>
+                    ` : ''}
+                </div>
+            `).join('')}
+            <div class="quote-tab-new" onclick="createNewQuote()">
+                + 新規作成
+            </div>
+        </div>
+    `;
+}
+
+// カテゴリタブ描画
+function renderCategoryTabs() {
+    return `
+        <div class="category-tabs">
+            ${Object.entries(CATEGORIES).map(([key, cat]) => `
+                <div class="category-tab ${key === currentCategory ? 'active' : ''}" 
+                     onclick="switchCategory('${key}')">
+                    ${cat.name}
+                </div>
+            `).join('')}
+        </div>
+    `;
+}
+
+// カテゴリコンテンツ描画
+function renderCategoryContent() {
+    if (quotes.length === 0) {
+        return '<div class="category-content"><div class="empty-message">見積がありません</div></div>';
+    }
+    
+    const quote = quotes[currentQuoteIndex];
+    const category = CATEGORIES[currentCategory];
+    
+    let items = [];
+    if (currentCategory === 'plan') {
+        items = quote.plan_items || [];
+    } else if (currentCategory === 'food') {
+        items = quote.food_items || [];
+    } else if (currentCategory === 'gift') {
+        items = quote.gift_items || [];
+    }
+    
+    // カテゴリ合計金額を計算
+    const categoryTotal = items.reduce((sum, item) => {
+        const price = parseInt(item.price_tax_included || 0);
+        const quantity = parseInt(item.quantity || 1);
+        return sum + (price * quantity);
+    }, 0);
+    
+    return `
+        <div class="category-content">
+            <div class="category-header">
+                <h2 class="category-title">${category.name}</h2>
+                <div class="category-total">¥${categoryTotal.toLocaleString()}</div>
+            </div>
+            
+            ${currentCategory === 'plan' ? renderPlanSection(quote) : ''}
+            
+            <div class="product-list-section">
+                ${items.length === 0 ? `
+                    <div class="empty-message">商品がありません</div>
+                ` : `
+                    <div class="product-items">
+                        ${items.map((item, index) => `
+                            <div class="product-item">
+                                <div class="product-info">
+                                    <div class="product-name">${item.product_name}</div>
+                                    <div class="product-details">
+                                        <span class="product-category">${item.product_category}</span>
+                                        <span class="product-price">¥${parseInt(item.price_tax_included || 0).toLocaleString()}</span>
+                                    </div>
+                                </div>
+                                <div class="product-controls">
+                                    <button class="qty-btn" onclick="updateQuantity(${index}, -1)">−</button>
+                                    <span class="qty-display">${item.quantity}</span>
+                                    <button class="qty-btn" onclick="updateQuantity(${index}, 1)">+</button>
+                                    <button class="btn-remove" onclick="removeProduct(${index})">削除</button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `}
+                ${currentCategory !== 'plan' ? `
+                    <button class="btn-add-product" onclick="showProductModal()">
+                        + 商品を追加
+                    </button>
+                ` : ''}
+            </div>
+        </div>
+    `;
+}
+
+// プランセクション描画
+function renderPlanSection(quote) {
+    return `
+        <div class="pattern-selector">
+            <div class="pattern-current">
+                <div class="pattern-name">
+                    ${quote.product_pattern_name || '商品パターン未選択'}
+                </div>
+                <button class="btn-change-pattern" onclick="showPatternModal()">
+                    ${quote.product_pattern_name ? '変更' : '選択'}
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+// 商品パターン選択モーダル描画
+function renderPatternModal() {
+    const patternTypes = [...new Set(patterns.map(p => p.product_pattern_type))].sort();
+    
+    return `
+        <div id="patternModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title">商品パターンを選択</h2>
+                    <button class="modal-close" onclick="closePatternModal()">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="filter-section">
+                        <label for="patternTypeFilter" class="filter-label">種別:</label>
+                        <select id="patternTypeFilter" class="filter-select" onchange="filterPatterns(this.value)">
+                            <option value="">-- 種別を選択してください --</option>
+                            ${patternTypes.map(type => `<option value="${type}">${type}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="pattern-grid" id="patternGrid"></div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// 商品追加モーダル描画
+function renderProductModal() {
+    return `
+        <div id="productModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title">商品を追加</h2>
+                    <button class="modal-close" onclick="closeProductModal()">×</button>
+                </div>
+                <div class="modal-body">
+                    <input type="text" id="productSearch" placeholder="商品名で検索..." 
+                           class="search-input" oninput="filterProducts(this.value)">
+                    <div class="product-list" id="productList"></div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// ========================================
+// 見積操作
+// ========================================
+async function createNewQuote() {
+    showLoading();
+    try {
+        const result = await createQuote(conductId, '', '', [], [], []);
+        
+        // 見積一覧を再取得
+        quotes = await fetchQuotes(conductId);
+        currentQuoteIndex = quotes.length - 1;
+        
+        renderUI();
+        
+    } catch (error) {
+        console.error('見積作成エラー:', error);
+        alert('見積の作成に失敗しました');
+    } finally {
+        hideLoading();
+    }
+}
+
+function switchQuote(index) {
+    currentQuoteIndex = index;
+    renderUI();
+}
+
+async function deleteQuoteConfirm(index) {
+    if (!confirm('この見積を削除しますか？')) {
+        return;
+    }
+    
+    showLoading();
+    try {
+        const quoteId = quotes[index].quote_id;
+        await deleteQuote(quoteId);
+        
+        // 見積一覧を再取得
+        quotes = await fetchQuotes(conductId);
+        
+        // インデックス調整
+        if (currentQuoteIndex >= quotes.length) {
+            currentQuoteIndex = quotes.length - 1;
+        }
+        if (currentQuoteIndex < 0) {
+            currentQuoteIndex = 0;
+        }
+        
+        // 見積がなくなった場合は1つ作成
+        if (quotes.length === 0) {
+            await createNewQuote();
+        } else {
+            renderUI();
+        }
+        
+    } catch (error) {
+        console.error('見積削除エラー:', error);
+        alert('見積の削除に失敗しました');
+    } finally {
+        hideLoading();
+    }
+}
+
+// ========================================
+// カテゴリ切り替え
+// ========================================
+function switchCategory(category) {
+    currentCategory = category;
+    renderUI();
+}
+// ========================================
+// 商品パターン選択
+// ========================================
+function showPatternModal() {
+    const modal = document.getElementById('patternModal');
+    modal.style.display = 'flex';
+}
+
+function closePatternModal() {
+    const modal = document.getElementById('patternModal');
+    modal.style.display = 'none';
+}
+
 function filterPatterns(patternType) {
     const grid = document.getElementById('patternGrid');
     
@@ -183,20 +384,17 @@ function filterPatterns(patternType) {
         return;
     }
     
-    const filteredPatterns = patterns
+    const filtered = patterns
         .filter(p => p.product_pattern_type === patternType)
-        .sort((a, b) => {
-            // 商品パターンIDで昇順ソート
-            return a.product_pattern_id.localeCompare(b.product_pattern_id);
-        });
+        .sort((a, b) => a.product_pattern_id.localeCompare(b.product_pattern_id));
     
-    if (filteredPatterns.length === 0) {
+    if (filtered.length === 0) {
         grid.innerHTML = '<div class="empty-message">該当する商品パターンがありません</div>';
         return;
     }
     
-    grid.innerHTML = filteredPatterns.map(pattern => `
-        <div class="pattern-card" data-pattern-id="${pattern.product_pattern_id}">
+    grid.innerHTML = filtered.map(pattern => `
+        <div class="pattern-card" onclick="selectPattern('${pattern.product_pattern_id}')">
             <div class="pattern-image">
                 ${pattern.imageUrl 
                     ? `<img src="${pattern.imageUrl}" alt="${pattern.product_pattern_name}" class="pattern-img">`
@@ -204,206 +402,91 @@ function filterPatterns(patternType) {
                 }
             </div>
             <div class="pattern-card-body">
-                <h3 class="pattern-name">${pattern.product_pattern_name}</h3>
+                <div class="pattern-card-name">${pattern.product_pattern_name}</div>
             </div>
         </div>
     `).join('');
-    
-    // カード全体のクリックイベント
-    document.querySelectorAll('.pattern-card').forEach(card => {
-        card.addEventListener('click', async () => {
-            const patternId = card.dataset.patternId;
-            await selectPattern(patternId);
-        });
-    });
 }
 
-// 商品パターンを選択
 async function selectPattern(patternId) {
-    console.log('選択された商品パターンID:', patternId); // デバッグログ
     showLoading();
     
     try {
         // 商品パターン詳細を取得
         const detail = await fetchPatternDetail(patternId);
-        console.log('取得した商品パターン詳細:', detail); // デバッグログ
         
-        selectedPattern = {
-            patternId: detail.product_pattern_id,
-            patternName: detail.product_pattern_name,
-            totalAmount: detail.total_amount
-        };
+        const quote = quotes[currentQuoteIndex];
         
-        // カートに商品を展開
-        cart = (detail.products || []).map((product, index) => ({
-            id: index + 1,
-            productCategory: product.product_category,
-            productAttribute: product.product_attribute,
-            productId: product.product_id,
-            productName: product.product_name,
-            price: parseInt(product.price_tax_included || 0),
-            quantity: parseInt(product.quantity || 1),
-            taxRate: product.tax_rate || '10'
-        }));
+        // プラン商品のみ更新（料理・返礼品は維持）
+        const planItems = (detail.products || [])
+            .filter(p => p.product_category === 'プラン' || !p.product_category)
+            .map(p => ({
+                product_category: p.product_category || '',
+                product_attribute: p.product_attribute || '',
+                product_id: p.product_id || '',
+                product_name: p.product_name || '',
+                price_tax_included: p.price_tax_included || '0',
+                quantity: p.quantity || '1',
+                tax_rate: p.tax_rate || '10'
+            }));
         
-        // ステップ2へ
-        renderStep2();
+        // 見積を更新
+        await updateQuote(
+            quote.quote_id,
+            detail.product_pattern_id,
+            detail.product_pattern_name,
+            planItems,
+            quote.food_items || [],
+            quote.gift_items || []
+        );
+        
+        // 見積一覧を再取得
+        quotes = await fetchQuotes(conductId);
+        
+        closePatternModal();
+        renderUI();
         
     } catch (error) {
-        console.error('パターン選択エラー:', error);
-        alert('商品パターンの読み込みに失敗しました');
+        console.error('商品パターン選択エラー:', error);
+        alert('商品パターンの選択に失敗しました');
     } finally {
         hideLoading();
     }
 }
 
-// 初期化実行
-document.addEventListener('DOMContentLoaded', init);
-
 // ========================================
-// ステップ2: 商品編集
+// 商品追加
 // ========================================
-function renderStep2() {
-    currentStep = 2;
-    
-    // ページTOPへスクロール
-    window.scrollTo(0, 0);
-    
-    const container = document.getElementById('app');
-    container.innerHTML = `
-        <div class="name-header-container">
-            <div class="name-box">
-                <div class="name-label">喪主</div>
-                <div class="name-value">${mournerName} 様</div>
-            </div>
-            <div class="name-box">
-                <div class="name-label">故人</div>
-                <div class="name-value">${deceasedName} 様</div>
-            </div>
-        </div>
-        <div class="step-container">
-            <div class="step-header-bar">
-                <h1 class="page-title">${selectedPattern.patternName}</h1>
-            </div>
-            
-            <div class="cart-section">
-                <h2 class="section-title">プラン内容</h2>
-                <div class="cart-list" id="cartList"></div>
-                <button class="btn-add-product" onclick="showProductModal()">+ 見積に追加</button>
-            </div>
-            
-            <div class="confirm-total">
-                <span>合計金額</span>
-                <span class="total-amount">¥<span id="totalAmount">0</span></span>
-            </div>
-            
-            <div class="confirm-actions">
-                <button class="btn-secondary" onclick="renderStep1()">← 戻る</button>
-                <button class="btn-primary" onclick="renderStep3()">確認画面へ</button>
-            </div>
-        </div>
-        
-        <!-- 商品追加モーダル -->
-        <div id="productModal" class="modal" style="display: none;">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2>見積に追加</h2>
-                    <button class="modal-close" onclick="closeProductModal()">×</button>
-                </div>
-                <div class="modal-body">
-                    <input type="text" id="productSearch" placeholder="商品名で検索..." class="search-input">
-                    <div class="product-list" id="productList"></div>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    updateCartDisplay();
-}
-
-// カート表示更新
-function updateCartDisplay() {
-    const cartList = document.getElementById('cartList');
-    if (!cartList) return;
-    
-    if (cart.length === 0) {
-        cartList.innerHTML = '<div class="empty-message">商品がありません</div>';
-    } else {
-        cartList.innerHTML = cart.map(item => `
-            <div class="cart-item">
-                <div class="cart-item-info">
-                    <div class="cart-item-name">${item.productName}</div>
-                    <div class="cart-item-details">
-                        <span class="detail-category">${item.productCategory}</span>
-                        <span class="detail-price">¥${item.price.toLocaleString()}</span>
-                    </div>
-                </div>
-                <div class="cart-item-controls">
-                    <button class="qty-btn" onclick="updateQuantity(${item.id}, -1)">−</button>
-                    <span class="qty-display">${item.quantity}</span>
-                    <button class="qty-btn" onclick="updateQuantity(${item.id}, 1)">+</button>
-                    <button class="btn-remove" onclick="removeItem(${item.id})">削除</button>
-                </div>
-            </div>
-        `).join('');
-    }
-    
-    // 合計金額を更新
-    const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    const totalElement = document.getElementById('totalAmount');
-    if (totalElement) {
-        totalElement.textContent = total.toLocaleString();
-    }
-}
-
-// 数量変更
-function updateQuantity(itemId, delta) {
-    const item = cart.find(i => i.id === itemId);
-    if (item) {
-        item.quantity += delta;
-        if (item.quantity < 1) item.quantity = 1;
-        updateCartDisplay();
-    }
-}
-
-// 商品削除
-function removeItem(itemId) {
-    if (confirm('この商品を削除しますか？')) {
-        cart = cart.filter(i => i.id !== itemId);
-        updateCartDisplay();
-    }
-}
-
-// 商品追加モーダル表示
 function showProductModal() {
     const modal = document.getElementById('productModal');
     modal.style.display = 'flex';
     
-    // 検索条件をクリア
+    // 検索をクリア
     const searchInput = document.getElementById('productSearch');
     searchInput.value = '';
     
-    renderProductList();
-    
-    // 検索イベント
-    searchInput.addEventListener('input', (e) => {
-        renderProductList(e.target.value);
-    });
+    filterProducts('');
 }
 
-// 商品追加モーダル閉じる
 function closeProductModal() {
     const modal = document.getElementById('productModal');
     modal.style.display = 'none';
 }
 
-// 商品リスト表示
-function renderProductList(searchTerm = '') {
+function filterProducts(searchTerm) {
     const productList = document.getElementById('productList');
+    const categoryType = CATEGORIES[currentCategory].type;
     
-    const filtered = productMaster.filter(p => 
-        searchTerm === '' || p.productName.includes(searchTerm)
-    );
+    // カテゴリでフィルタ
+    let filtered = productMaster.filter(p => p.productType === categoryType);
+    
+    // 検索語でフィルタ
+    if (searchTerm) {
+        filtered = filtered.filter(p => 
+            p.productName.includes(searchTerm) ||
+            (p.productCategory && p.productCategory.includes(searchTerm))
+        );
+    }
     
     if (filtered.length === 0) {
         productList.innerHTML = '<div class="empty-message">商品が見つかりません</div>';
@@ -411,146 +494,176 @@ function renderProductList(searchTerm = '') {
     }
     
     productList.innerHTML = filtered.map(product => `
-        <div class="product-item" onclick="addProductToCart('${product.productId}')">
-            ${product.imageUrl ? `<img src="${product.imageUrl}" class="product-thumb">` : '<div class="product-thumb-placeholder">NO IMAGE</div>'}
-            <div class="product-item-info">
-                <div class="product-item-name">${product.productName}</div>
-                <div class="product-item-price">¥${product.price.toLocaleString()}</div>
+        <div class="product-list-item" onclick="addProduct('${product.productId}')">
+            ${product.imageUrl 
+                ? `<img src="${product.imageUrl}" class="product-thumb">`
+                : '<div class="product-thumb-placeholder">NO IMAGE</div>'
+            }
+            <div class="product-list-item-info">
+                <div class="product-list-item-name">${product.productName}</div>
+                <div class="product-list-item-price">¥${product.price.toLocaleString()}</div>
             </div>
         </div>
     `).join('');
 }
 
-// 商品をカートに追加
-function addProductToCart(productId) {
+async function addProduct(productId) {
     const product = productMaster.find(p => p.productId === productId);
     if (!product) return;
     
-    // すでにカートにある場合は数量を増やす
-    const existing = cart.find(i => i.productId === productId);
-    if (existing) {
-        existing.quantity++;
-    } else {
-        cart.push({
-            id: Date.now(),
-            productCategory: product.productCategory,
-            productAttribute: product.productAttribute,
-            productId: product.productId,
-            productName: product.productName,
-            price: product.price,
-            quantity: 1,
-            taxRate: product.taxRate
-        });
-    }
+    showLoading();
     
-    updateCartDisplay();
-    closeProductModal();
+    try {
+        const quote = quotes[currentQuoteIndex];
+        
+        // 現在のカテゴリの商品リストを取得
+        let items = [];
+        if (currentCategory === 'plan') {
+            items = [...(quote.plan_items || [])];
+        } else if (currentCategory === 'food') {
+            items = [...(quote.food_items || [])];
+        } else if (currentCategory === 'gift') {
+            items = [...(quote.gift_items || [])];
+        }
+        
+        // 既に存在する場合は数量を増やす
+        const existing = items.find(i => i.product_id === productId);
+        if (existing) {
+            existing.quantity = (parseInt(existing.quantity) + 1).toString();
+        } else {
+            items.push({
+                product_category: product.productCategory,
+                product_attribute: product.productAttribute,
+                product_id: product.productId,
+                product_name: product.productName,
+                price_tax_included: product.price.toString(),
+                quantity: '1',
+                tax_rate: product.taxRate
+            });
+        }
+        
+        // 見積を更新
+        await updateQuote(
+            quote.quote_id,
+            quote.product_pattern_id,
+            quote.product_pattern_name,
+            currentCategory === 'plan' ? items : quote.plan_items || [],
+            currentCategory === 'food' ? items : quote.food_items || [],
+            currentCategory === 'gift' ? items : quote.gift_items || []
+        );
+        
+        // 見積一覧を再取得
+        quotes = await fetchQuotes(conductId);
+        
+        closeProductModal();
+        renderUI();
+        
+    } catch (error) {
+        console.error('商品追加エラー:', error);
+        alert('商品の追加に失敗しました');
+    } finally {
+        hideLoading();
+    }
 }
 
 // ========================================
-// ステップ3: 最終確認
+// 商品数量変更
 // ========================================
-function renderStep3() {
-    currentStep = 3;
+async function updateQuantity(itemIndex, delta) {
+    showLoading();
     
-    // ページTOPへスクロール
-    window.scrollTo(0, 0);
-    
-    const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    
-    const container = document.getElementById('app');
-    container.innerHTML = `
-        <div class="name-header-container">
-            <div class="name-box">
-                <div class="name-label">喪主</div>
-                <div class="name-value">${mournerName} 様</div>
-            </div>
-            <div class="name-box">
-                <div class="name-label">故人</div>
-                <div class="name-value">${deceasedName} 様</div>
-            </div>
-        </div>
-        <div class="step-container">
-            <h1 class="page-title">お見積り内容</h1>
-            
-            <div class="confirm-section">
-                <h2 class="section-title">お見積り明細</h2>
-                <table class="quote-table">
-                    <thead>
-                        <tr>
-                            <th>商品区分</th>
-                            <th>商品名</th>
-                            <th>数量</th>
-                            <th>単価</th>
-                            <th>計</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${cart.map(item => `
-                            <tr>
-                                <td>${item.productCategory}</td>
-                                <td>${item.productName}</td>
-                                <td class="text-center">${item.quantity}</td>
-                                <td class="text-right">¥${item.price.toLocaleString()}</td>
-                                <td class="text-right total-cell">¥${(item.price * item.quantity).toLocaleString()}</td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            </div>
-            
-            <div class="confirm-total">
-                <span>合計金額</span>
-                <span class="total-amount">¥${total.toLocaleString()}</span>
-            </div>
-            
-            <div class="confirm-actions">
-                <button class="btn-secondary" onclick="renderStep2()">← 戻る</button>
-                <button class="btn-primary" onclick="saveQuote()">保存</button>
-            </div>
-        </div>
-    `;
+    try {
+        const quote = quotes[currentQuoteIndex];
+        
+        // 現在のカテゴリの商品リストを取得
+        let items = [];
+        if (currentCategory === 'plan') {
+            items = [...(quote.plan_items || [])];
+        } else if (currentCategory === 'food') {
+            items = [...(quote.food_items || [])];
+        } else if (currentCategory === 'gift') {
+            items = [...(quote.gift_items || [])];
+        }
+        
+        const item = items[itemIndex];
+        if (!item) return;
+        
+        let newQty = parseInt(item.quantity) + delta;
+        if (newQty < 1) newQty = 1;
+        
+        item.quantity = newQty.toString();
+        
+        // 見積を更新
+        await updateQuote(
+            quote.quote_id,
+            quote.product_pattern_id,
+            quote.product_pattern_name,
+            currentCategory === 'plan' ? items : quote.plan_items || [],
+            currentCategory === 'food' ? items : quote.food_items || [],
+            currentCategory === 'gift' ? items : quote.gift_items || []
+        );
+        
+        // 見積一覧を再取得
+        quotes = await fetchQuotes(conductId);
+        
+        renderUI();
+        
+    } catch (error) {
+        console.error('数量変更エラー:', error);
+        alert('数量の変更に失敗しました');
+    } finally {
+        hideLoading();
+    }
 }
 
-// 見積保存
-async function saveQuote() {
-    if (!conductId) {
-        alert('施工IDが設定されていません');
-        return;
-    }
-    
-    if (cart.length === 0) {
-        alert('商品が選択されていません');
+// ========================================
+// 商品削除
+// ========================================
+async function removeProduct(itemIndex) {
+    if (!confirm('この商品を削除しますか？')) {
         return;
     }
     
     showLoading();
     
     try {
-        const items = cart.map(item => ({
-            productCategory: item.productCategory,
-            productAttribute: item.productAttribute,
-            productId: item.productId,
-            productName: item.productName,
-            price: item.price,
-            quantity: item.quantity,
-            taxRate: item.taxRate
-        }));
+        const quote = quotes[currentQuoteIndex];
         
-        await saveQuoteToKintone(
-            conductId,
-            selectedPattern.patternId,
-            selectedPattern.patternName,
-            items
+        // 現在のカテゴリの商品リストを取得
+        let items = [];
+        if (currentCategory === 'plan') {
+            items = [...(quote.plan_items || [])];
+        } else if (currentCategory === 'food') {
+            items = [...(quote.food_items || [])];
+        } else if (currentCategory === 'gift') {
+            items = [...(quote.gift_items || [])];
+        }
+        
+        // 指定された商品を削除
+        items.splice(itemIndex, 1);
+        
+        // 見積を更新
+        await updateQuote(
+            quote.quote_id,
+            quote.product_pattern_id,
+            quote.product_pattern_name,
+            currentCategory === 'plan' ? items : quote.plan_items || [],
+            currentCategory === 'food' ? items : quote.food_items || [],
+            currentCategory === 'gift' ? items : quote.gift_items || []
         );
         
-        alert('見積を保存しました');
+        // 見積一覧を再取得
+        quotes = await fetchQuotes(conductId);
+        
+        renderUI();
         
     } catch (error) {
-        console.error('保存エラー:', error);
-        alert('見積の保存に失敗しました: ' + error.message);
+        console.error('商品削除エラー:', error);
+        alert('商品の削除に失敗しました');
     } finally {
         hideLoading();
     }
 }
 
+// ページ読み込み時に初期化
+document.addEventListener('DOMContentLoaded', init);
