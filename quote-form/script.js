@@ -417,18 +417,16 @@ async function selectPattern(patternId) {
         
         const quote = quotes[currentQuoteIndex];
         
-        // プラン商品のみ更新（料理・返礼品は維持）
-        const planItems = (detail.products || [])
-            .filter(p => p.product_category === 'プラン' || !p.product_category)
-            .map(p => ({
-                product_category: p.product_category || '',
-                product_attribute: p.product_attribute || '',
-                product_id: p.product_id || '',
-                product_name: p.product_name || '',
-                price_tax_included: p.price_tax_included || '0',
-                quantity: p.quantity || '1',
-                tax_rate: p.tax_rate || '10'
-            }));
+        // プラン商品を更新（料理・返礼品は維持）
+        const planItems = (detail.products || []).map(p => ({
+            product_category: p.product_category || '',
+            product_attribute: p.product_attribute || '',
+            product_id: p.product_id || '',
+            product_name: p.product_name || '',
+            price_tax_included: p.price_tax_included || '0',
+            quantity: p.quantity || '1',
+            tax_rate: p.tax_rate || '10'
+        }));
         
         // 見積を更新
         await updateQuote(
