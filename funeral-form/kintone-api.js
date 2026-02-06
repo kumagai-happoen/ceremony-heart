@@ -9,7 +9,7 @@ async function loadRecord() {
     return;
   }
 
-  const res = await fetch("https://get-conduct-manage.kkumagai.workers.dev/", {
+  const res = await fetch("https://funeral-worker.kkumagai.workers.dev/", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ conductId })
@@ -263,7 +263,7 @@ async function saveRecord() {
   // デバッグ: 送信するデータを確認
   console.log('kintoneに送信するpayload:', payload);
 
-  const res = await fetch("https://post-conduct-manage.kkumagai.workers.dev/update", {
+  const res = await fetch("https://funeral-worker.kkumagai.workers.dev/update", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
