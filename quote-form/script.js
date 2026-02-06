@@ -174,6 +174,9 @@ function renderCategoryTabs() {
                     <div class="grand-total-label">総合計</div>
                     <div class="grand-total-amount">¥${grandTotal.toLocaleString()}</div>
                 </div>
+                <button class="btn-copy-quote" onclick="copyQuote()">
+                    この見積をコピーして作成
+                </button>
                 ${quotes.length > 1 ? `
                     <button class="btn-delete-quote" onclick="deleteQuoteConfirm()">
                         この見積を削除
@@ -323,6 +326,8 @@ async function createNewQuote() {
         
         // 見積一覧を再取得
         quotes = await fetchQuotes(conductId);
+        
+        // 最後（最新）の見積を選択
         currentQuoteIndex = quotes.length - 1;
         
         renderUI();
@@ -330,6 +335,37 @@ async function createNewQuote() {
     } catch (error) {
         console.error('見積作成エラー:', error);
         alert('見積の作成に失敗しました');
+    } finally {
+        hideLoading();
+    }
+}
+
+async function copyQuote() {
+    showLoading();
+    try {
+        const currentQuote = quotes[currentQuoteIndex];
+        
+        // 現在の見積をコピーして新規作成
+        const result = await createQuote(
+            conductId,
+            currentQuote.product_pattern_id,
+            currentQuote.product_pattern_name,
+            currentQuote.plan_items || [],
+            currentQuote.food_items || [],
+            currentQuote.gift_items || []
+        );
+        
+        // 見積一覧を再取得
+        quotes = await fetchQuotes(conductId);
+        
+        // 最後（最新）の見積を選択
+        currentQuoteIndex = quotes.length - 1;
+        
+        renderUI();
+        
+    } catch (error) {
+        console.error('見積コピーエラー:', error);
+        alert('見積のコピーに失敗しました');
     } finally {
         hideLoading();
     }
