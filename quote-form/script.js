@@ -135,12 +135,6 @@ function renderQuoteTabs() {
                 <div class="quote-tab ${index === currentQuoteIndex ? 'active' : ''}" 
                      onclick="switchQuote(${index})">
                     見積 ${index + 1}
-                    ${quotes.length > 1 ? `
-                        <button class="quote-tab-close" 
-                                onclick="event.stopPropagation(); deleteQuoteConfirm(${index})">
-                            ×
-                        </button>
-                    ` : ''}
                 </div>
             `).join('')}
             <div class="quote-tab-new" onclick="createNewQuote()">
@@ -152,14 +146,40 @@ function renderQuoteTabs() {
 
 // カテゴリタブ描画
 function renderCategoryTabs() {
+    // 総合計を計算
+    const quote = quotes[currentQuoteIndex] || { plan_items: [], food_items: [], gift_items: [] };
+    const planTotal = (quote.plan_items || []).reduce((sum, item) => {
+        return sum + (parseInt(item.price_tax_included || 0) * parseInt(item.quantity || 1));
+    }, 0);
+    const foodTotal = (quote.food_items || []).reduce((sum, item) => {
+        return sum + (parseInt(item.price_tax_included || 0) * parseInt(item.quantity || 1));
+    }, 0);
+    const giftTotal = (quote.gift_items || []).reduce((sum, item) => {
+        return sum + (parseInt(item.price_tax_included || 0) * parseInt(item.quantity || 1));
+    }, 0);
+    const grandTotal = planTotal + foodTotal + giftTotal;
+    
     return `
         <div class="category-tabs">
-            ${Object.entries(CATEGORIES).map(([key, cat]) => `
-                <div class="category-tab ${key === currentCategory ? 'active' : ''}" 
-                     onclick="switchCategory('${key}')">
-                    ${cat.name}
+            <div class="category-tabs-menu">
+                ${Object.entries(CATEGORIES).map(([key, cat]) => `
+                    <div class="category-tab ${key === currentCategory ? 'active' : ''}" 
+                         onclick="switchCategory('${key}')">
+                        ${cat.name}
+                    </div>
+                `).join('')}
+            </div>
+            <div class="category-tabs-footer">
+                <div class="grand-total">
+                    <div class="grand-total-label">総合計</div>
+                    <div class="grand-total-amount">¥${grandTotal.toLocaleString()}</div>
                 </div>
-            `).join('')}
+                ${quotes.length > 1 ? `
+                    <button class="btn-delete-quote" onclick="deleteQuoteConfirm()">
+                        この見積を削除
+                    </button>
+                ` : ''}
+            </div>
         </div>
     `;
 }
@@ -320,14 +340,14 @@ function switchQuote(index) {
     renderUI();
 }
 
-async function deleteQuoteConfirm(index) {
+async function deleteQuoteConfirm() {
     if (!confirm('この見積を削除しますか？')) {
         return;
     }
     
     showLoading();
     try {
-        const quoteId = quotes[index].quote_id;
+        const quoteId = quotes[currentQuoteIndex].quote_id;
         await deleteQuote(quoteId);
         
         // 見積一覧を再取得
