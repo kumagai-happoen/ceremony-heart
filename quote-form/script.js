@@ -184,7 +184,7 @@ function renderCategoryTabs() {
                 ` : `
                     <div class="finalized-message">
                         <span class="finalized-icon">✓</span>
-                        確定済み
+                        確定済
                     </div>
                 `}
                 <button class="btn-copy-quote" onclick="copyQuote()">
