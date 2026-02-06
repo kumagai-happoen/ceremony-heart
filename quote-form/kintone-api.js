@@ -1,17 +1,10 @@
 /**
- * kintone API連携モジュール（Cloudflare Workers経由）
+ * kintone API連携モジュール（統合Cloudflare Worker経由）
  * 商品パターン・商品マスタからデータを取得して見積画面に表示
  */
 
-// Cloudflare Workers設定
-const WORKER_CONFIG = {
-    conductInfoUrl: 'https://get-conduct-info.kkumagai.workers.dev/',
-    productPatternMasterUrl: 'https://get-product-pattern-master.kkumagai.workers.dev/',
-    productPatternDetailUrl: 'https://get-product-pattern-detail.kkumagai.workers.dev/',
-    productMasterUrl: 'https://get-product-master.kkumagai.workers.dev/',
-    productImageUrl: 'https://get-product-image.kkumagai.workers.dev/',
-    saveQuoteUrl: 'https://save-quote.kkumagai.workers.dev/'
-};
+// Cloudflare Worker設定（統合Worker）
+const WORKER_BASE_URL = 'https://quote-worker.kkumagai.workers.dev/';
 
 /**
  * 施工情報と見積データを取得
@@ -20,7 +13,7 @@ const WORKER_CONFIG = {
  */
 async function fetchConductInfo(conductId) {
     try {
-        const response = await fetch(`${WORKER_CONFIG.conductInfoUrl}?conductId=${conductId}`, {
+        const response = await fetch(`${WORKER_BASE_URL}/conduct-info?conductId=${conductId}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
@@ -53,7 +46,7 @@ async function fetchConductInfo(conductId) {
  */
 async function fetchPatternMaster() {
     try {
-        const response = await fetch(WORKER_CONFIG.productPatternMasterUrl, {
+        const response = await fetch(`${WORKER_BASE_URL}/product-pattern-master`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
@@ -71,7 +64,7 @@ async function fetchPatternMaster() {
         return (data.patterns || []).map(pattern => ({
             ...pattern,
             imageUrl: pattern.image_files && pattern.image_files.length > 0
-                ? `${WORKER_CONFIG.productImageUrl}?fileKey=${pattern.image_files[0].fileKey}`
+                ? `${WORKER_BASE_URL}/product-image?fileKey=${pattern.image_files[0].fileKey}`
                 : null
         }));
 
@@ -88,7 +81,7 @@ async function fetchPatternMaster() {
  */
 async function fetchPatternDetail(productPatternId) {
     try {
-        const response = await fetch(`${WORKER_CONFIG.productPatternDetailUrl}?productPatternId=${productPatternId}`, {
+        const response = await fetch(`${WORKER_BASE_URL}/product-pattern-detail?productPatternId=${productPatternId}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
@@ -115,7 +108,7 @@ async function fetchPatternDetail(productPatternId) {
  */
 async function fetchProductMaster() {
     try {
-        const response = await fetch(WORKER_CONFIG.productMasterUrl, {
+        const response = await fetch(`${WORKER_BASE_URL}/product-master`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
@@ -139,7 +132,7 @@ async function fetchProductMaster() {
             price: parseInt(product.price_tax_included || '0'),
             taxRate: product.tax_rate || '10',
             imageUrl: product.image_files && product.image_files.length > 0 
-                ? `${WORKER_CONFIG.productImageUrl}?fileKey=${product.image_files[0].fileKey}` 
+                ? `${WORKER_BASE_URL}/product-image?fileKey=${product.image_files[0].fileKey}` 
                 : null
         }));
 
@@ -159,7 +152,7 @@ async function fetchProductMaster() {
  */
 async function saveQuoteToKintone(conductId, patternId, patternName, items) {
     try {
-        const response = await fetch(WORKER_CONFIG.saveQuoteUrl, {
+        const response = await fetch(`${WORKER_BASE_URL}/save-quote`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -194,6 +187,6 @@ if (typeof module !== 'undefined' && module.exports) {
         fetchPatternMaster,
         fetchPatternDetail,
         fetchProductMaster,
-        saveQuote
+        saveQuoteToKintone
     };
 }
