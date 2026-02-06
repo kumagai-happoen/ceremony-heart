@@ -134,8 +134,9 @@ function renderQuoteTabs() {
     return `
         <div class="quote-tabs-container">
             ${quotes.map((quote, index) => `
-                <div class="quote-tab ${index === currentQuoteIndex ? 'active' : ''}" 
+                <div class="quote-tab ${index === currentQuoteIndex ? 'active' : ''} ${quote.is_finalized ? 'finalized' : ''}" 
                      onclick="switchQuote(${index})">
+                    ${quote.is_finalized ? '<span class="finalized-badge">✓</span>' : ''}
                     見積 ${index + 1}
                 </div>
             `).join('')}
@@ -432,6 +433,11 @@ async function finalizeQuoteConfirm() {
     try {
         const quoteId = quotes[currentQuoteIndex].quote_id;
         await finalizeQuote(conductId, quoteId);
+        
+        // 見積一覧を再取得（確定済みフラグを反映）
+        quotes = await fetchQuotes(conductId);
+        
+        renderUI();
         
         alert('見積を確定しました。\n施工管理アプリに保存されました。');
         
